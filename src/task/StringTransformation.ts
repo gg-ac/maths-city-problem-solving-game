@@ -1,6 +1,6 @@
 export class Symbol {
     // Define the properties and methods of the Symbol class as needed
-    constructor(private id: string, public isGeneric: boolean = false) { }
+    constructor(public id: string, public isGeneric: boolean = false) { }
 
     matches(s: Symbol) {
         if (this.isGeneric || s.isGeneric) {
