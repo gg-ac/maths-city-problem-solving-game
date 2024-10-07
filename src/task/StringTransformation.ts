@@ -1,4 +1,3 @@
-// Assuming the Symbol class is defined elsewhere
 export class Symbol {
     // Define the properties and methods of the Symbol class as needed
     constructor(private id: string, public isGeneric: boolean = false) { }
