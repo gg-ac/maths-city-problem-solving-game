@@ -1,5 +1,4 @@
 import { GameObjects } from 'phaser';
-import { OrientationChecker } from '../components/orientationChecker';
 import BaseScene from './BaseScene';
 import { GAME_HEIGHT, GAME_WIDTH } from '../constants/GameConstants';
 
@@ -8,7 +7,6 @@ export class MainMenu extends BaseScene
     background: GameObjects.Image;
     title: GameObjects.Text;
     orientation_warning_text: GameObjects.Text;
-    orientationChecker: OrientationChecker;
 
     constructor ()
     {
