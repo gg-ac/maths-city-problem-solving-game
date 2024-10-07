@@ -9,13 +9,13 @@ export default class BaseScene extends Phaser.Scene {
 
     create() {
         this.checkDeviceAndOrientation();
-        window.addEventListener('resize', this.checkDeviceAndOrientation.bind(this));
+        this.scale.on('orientationchange', () => { this.checkDeviceAndOrientation; this.scale.refresh() }, this);
+        this.scale.on('resize', this.checkDeviceAndOrientation, this);
     }
 
     private checkDeviceAndOrientation() {
         const isMobile = this.isMobileDevice();
         const isLandscape = window.innerWidth > window.innerHeight;
-
         if (isMobile && isLandscape) {
             this.showWarning();
         } else {
@@ -35,7 +35,9 @@ export default class BaseScene extends Phaser.Scene {
         if (overlay) {
             overlay.style.display = 'flex';
         }
-        this.scene.pause();
+        if (!this.scene.isPaused()) {
+            this.scene.pause();
+        }
     }
 
     private hideWarning() {
@@ -43,69 +45,8 @@ export default class BaseScene extends Phaser.Scene {
         if (overlay) {
             overlay.style.display = 'none';
         }
-        this.scene.resume();
-    }
-
-    // Clean up the event listener when the scene is destroyed
-    shutdown() {
-        window.removeEventListener('resize', this.checkDeviceAndOrientation.bind(this));
+        if (this.scene.isPaused()) {
+            this.scene.resume();
+        }
     }
 }
-
-
-
-// import Phaser from 'phaser';
-
-// export default class BaseScene extends Phaser.Scene {
-//     private startText: Phaser.GameObjects.Text;
-
-//     constructor(key:string) {
-//         super(key);
-//     }
-
-//     preload() {
-//         // Load any assets if needed
-//     }
-
-//     create() {
-//         // Display the "press to start" message
-//         this.startText = this.add.text(
-//             this.cameras.main.centerX,
-//             this.cameras.main.centerY,
-//             'Press to Start',
-//             { fontSize: '32px', color: '#ffffff' }
-//         ).setOrigin(0.5, 0.5);
-
-//         // Add an input listener for the pointer down event
-//         this.input.on('pointerdown', this.enterFullscreen, this);
-
-//         // Listen for fullscreen change events
-//         this.scale.on('fullscreenchange', this.onFullscreenChange, this);
-//     }
-
-//     private async enterFullscreen() {
-//         if (!this.scale.isFullscreen) {
-//             // Start fullscreen mode
-//             await this.scale.startFullscreen();
-
-//             // Lock the orientation to portrait
-//             if (screen.orientation && screen.orientation.lock) {
-//                 try {
-//                     await screen.orientation.lock('portrait');
-//                 } catch (err) {
-//                     console.error('Failed to lock orientation:', err);
-//                 }
-//             }
-//         }
-//     }
-
-//     private onFullscreenChange() {
-//         if (!this.scale.isFullscreen) {
-//             // If exiting fullscreen, show the "press to start" message again
-//             this.startText.setVisible(true);
-//         } else {
-//             // If entering fullscreen, hide the message
-//             this.startText.setVisible(false);
-//         }
-//     }
-// }
