@@ -64,6 +64,17 @@ describe('TransformationRule', () => {
         }).toThrow('Output cannot contain generic symbols which do not also exist in the input');
     });
 
+    it('should throw an error if a generic symbol is matched to different input symbols', () => {
+        const generic = new Symbol("b", true)
+        const inputSymbols = [generic, new Symbol("a", false), generic];
+        const outputSymbols = [new Symbol("c", false), generic];
+        const rule = new TransformationRule(inputSymbols, outputSymbols);
+        const targetSymbols = Array.from("The cat is on the roof.", s => new Symbol(s));
+        expect(() => {
+            rule.apply(targetSymbols, 4)
+        }).toThrow('Generic symbol with ID b cannot be matched to multiple symbols: c,t\n');
+    });
+
     it('should handle transformations at the end of the list', () => {
         const inputSymbols = Array.from("roof", s => new Symbol(s));
         const outputSymbols = Array.from("mat", s => new Symbol(s));

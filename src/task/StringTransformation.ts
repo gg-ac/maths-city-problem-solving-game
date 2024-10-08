@@ -38,6 +38,33 @@ export class TransformationRule {
         const substring = target.slice(index, index + this.input.length);
         const isMatch = this.input.every((symbol, i) => symbol.matches(substring[i]));
 
+        
+        // A given generic can't be applied to two or more different non-generic symbols
+        let genericApplicationHistory = new Map<Symbol, Symbol[]>()
+        const genericsNotOverloaded = this.input.every((s, i) => {
+            if(genericApplicationHistory.has(s)){
+                if(genericApplicationHistory.get(s)![0] === substring[i]){
+                    return true
+                }else{
+                    genericApplicationHistory.set(s, [...genericApplicationHistory.get(s)!, substring[i]])
+                }
+            }else{
+                genericApplicationHistory.set(s, [substring[i]])
+                return true
+            }
+        })
+        if(!genericsNotOverloaded){
+            let message = ""
+            genericApplicationHistory.forEach((match, generic) =>{
+                if(match.length > 1){
+                    message += `Generic symbol with ID ${generic.id} cannot be matched to multiple symbols: ${match.map((s) => {return s.id})}\n`
+                }
+            })
+            throw new Error(message);
+        }
+
+
+        // Check if the pattern occurs at the specified position
         if (isMatch) {
             let newString = [
                 ...target.slice(0, index), // Elements before the match
