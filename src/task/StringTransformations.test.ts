@@ -40,20 +40,15 @@ describe('TransformationRule', () => {
         expect(result).toBeNull();
     });
 
-    it('should throw an error if the index is out of bounds', () => {
+    it('should return null if the index is out of bounds', () => {
         const inputSymbols = Array.from("cat", s => new Symbol(s));
         const outputSymbols = Array.from("dog", s => new Symbol(s));
         const rule = new TransformationRule(inputSymbols, outputSymbols);
         
         const targetSymbols = Array.from("The cat is on the roof.", s => new Symbol(s));
         
-        expect(() => {
-            rule.apply(targetSymbols, -1);
-        }).toThrow('Rule of length 3 cannot be applied at index -1 of target list of length 23');
-
-        expect(() => {
-            rule.apply(targetSymbols, 25);
-        }).toThrow('Rule of length 3 cannot be applied at index 25 of target list of length 23');
+        expect(rule.apply(targetSymbols, -1)).toBeNull();
+        expect(rule.apply(targetSymbols, 25)).toBeNull();
     });
 
     it('should throw an error if a given generic symbol appears in the output but not the input', () => {

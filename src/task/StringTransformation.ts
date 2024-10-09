@@ -11,12 +11,15 @@ export class Symbol {
 }
 
 export class TransformationRule {
-    constructor(private input: Symbol[], private output: Symbol[]) {
+    private _input: Symbol[]
+    private _output: Symbol[]
+    constructor(input: Symbol[], output: Symbol[]) {
 
-
-        const outputUsesPredefinedGenerics = this.output.every(s => {
+        this._input = input
+        this._output = output
+        const outputUsesPredefinedGenerics = this._output.every(s => {
             if (s.isGeneric) {
-                return this.input.includes(s)
+                return this._input.includes(s)
             } else {
                 return true
             }
@@ -28,36 +31,45 @@ export class TransformationRule {
 
     }
 
+    get input(): Symbol[] {
+        return this._input
+    }
+
+    get output(): Symbol[] {
+        return this._output
+    }
+
     apply(target: Symbol[], index: number): Symbol[] | null {
         // Check if the position is valid
-        if (index < 0 || index > target.length - this.input.length) {
-            throw new Error(`Rule of length ${this.input.length} cannot be applied at index ${index} of target list of length ${target.length}`);
+        if (index < 0 || index > target.length - this._input.length) {
+            return null
+            //throw new Error(`Rule of length ${this._input.length} cannot be applied at index ${index} of target list of length ${target.length}`);
         }
 
         // Check if the pattern occurs at the specified position
-        const substring = target.slice(index, index + this.input.length);
-        const isMatch = this.input.every((symbol, i) => symbol.matches(substring[i]));
+        const substring = target.slice(index, index + this._input.length);
+        const isMatch = this._input.every((symbol, i) => symbol.matches(substring[i]));
 
-        
+
         // A given generic can't be applied to two or more different non-generic symbols
         let genericApplicationHistory = new Map<Symbol, Symbol[]>()
-        const genericsNotOverloaded = this.input.every((s, i) => {
-            if(genericApplicationHistory.has(s)){
-                if(genericApplicationHistory.get(s)![0] === substring[i]){
+        const genericsNotOverloaded = this._input.every((s, i) => {
+            if (genericApplicationHistory.has(s)) {
+                if (genericApplicationHistory.get(s)![0] === substring[i]) {
                     return true
-                }else{
+                } else {
                     genericApplicationHistory.set(s, [...genericApplicationHistory.get(s)!, substring[i]])
                 }
-            }else{
+            } else {
                 genericApplicationHistory.set(s, [substring[i]])
                 return true
             }
         })
-        if(!genericsNotOverloaded){
+        if (!genericsNotOverloaded) {
             let message = ""
-            genericApplicationHistory.forEach((match, generic) =>{
-                if(match.length > 1){
-                    message += `Generic symbol with ID ${generic.id} cannot be matched to multiple symbols: ${match.map((s) => {return s.id})}\n`
+            genericApplicationHistory.forEach((match, generic) => {
+                if (match.length > 1) {
+                    message += `Generic symbol with ID ${generic.id} cannot be matched to multiple symbols: ${match.map((s) => { return s.id })}\n`
                 }
             })
             throw new Error(message);
@@ -68,14 +80,14 @@ export class TransformationRule {
         if (isMatch) {
             let newString = [
                 ...target.slice(0, index), // Elements before the match
-                ...this.output, // Replacement symbols
-                ...target.slice(index + this.input.length) // Elements after the match
+                ...this._output, // Replacement symbols
+                ...target.slice(index + this._input.length) // Elements after the match
             ]
 
             // Replace the generics in the output with their corresponding symbols from the target string
             newString.forEach((s, io) => {
                 if (s.isGeneric) {
-                    const ii = this.input.indexOf(s)
+                    const ii = this._input.indexOf(s)
                     newString[io] = target[index + ii]
                 }
             })
