@@ -16,37 +16,33 @@ export class TaskTrialStringTransformation {
         this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, 0, GAME_WIDTH, GAME_HEIGHT / 2, 10)
         this.stringPanelState = new StringPanelState(this.startState, (newState) => {this.stringPanelGraphics.setSymbolString(newState.currentString); this.stringPanelGraphics.setActiveSymbolIndex(newState.currentActiveIndex)})
 
-        this.stringPanelGraphics.setOnSymbolPress((i) => this.updateSelectedSymbolState(i))
+        this.stringPanelGraphics.setOnSymbolPress((i) => {this.stringPanelState.activateSymbol(i); this.tryApplyCurrentRule()})
 
         this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, GAME_HEIGHT/2, GAME_WIDTH, GAME_HEIGHT/2, 10, this.rules)
-        this.rulePanelState = new RulePanelState(this.rules)
+        this.rulePanelState = new RulePanelState((ruleIndex) => this.rulePanelGraphics.setActiveSubpanel(ruleIndex))
 
-        this.rulePanelGraphics.setOnRulePress((r) => this.applyRule(r))
+        this.rulePanelGraphics.setOnRulePress((i) => {this.rulePanelState.activateRule(i); this.tryApplyCurrentRule()})
     }
 
-    private updateSelectedSymbolState(i: integer | null) {
-        console.log(i);
-        if (this.stringPanelState.currentState.currentActiveIndex !== i) {
-            this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, i)
-        } else {
-            this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, null)
-        }
-    }
-
-    private applyRule(ruleIndex:integer){
+    private tryApplyCurrentRule(){
         const targetIndex = this.stringPanelState.currentState.currentActiveIndex
-        if(targetIndex !== null){
-            const result = this.rulePanelState.applyRule(ruleIndex, this.stringPanelState.currentState.currentString, targetIndex)
+        const ruleIndex = this.rulePanelState.activeRuleIndex
+        let rule:TransformationRule|null = null
+        if(ruleIndex !== null){
+         rule = this.rules[ruleIndex]
+        }
+
+        if(rule !== null && targetIndex !== null){
+            const result = rule.apply(this.stringPanelState.currentState.currentString, targetIndex)
             if(result !== null){
                 this.stringPanelState.currentState = new StringState(result, null)
                 console.log("Rule application: Succeeded")
+                this.rulePanelState.activateRule(null)
             }else{
                 this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, null)
                 console.log("Rule application: Failed")
             }
         }
-        
-        console.log(this.rulePanelState.getActionHistoryData())
     }
 
 }

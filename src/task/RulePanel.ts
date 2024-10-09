@@ -1,37 +1,23 @@
 import { SymbolFactory } from "./SymbolFactory";
 import { TransformationRule } from "./StringTransformation";
-import { Symbol } from "./StringTransformation";
-
-export class RuleAction {
-    constructor(public rule: TransformationRule, public targetString: Symbol[], public targetIndex: integer, public successful: boolean) { }
-}
 
 export class RulePanelState {
-    private actionHistory: RuleAction[];
-    constructor(private rules: TransformationRule[], private onApplyRuleAction?: (rule: TransformationRule) => void) {
-        this.actionHistory = []
+    private _activeRuleIndex: integer | null
+    constructor(private onUpdateActiveRule: (ruleIndex: integer | null) => void) {
+        this._activeRuleIndex = null
     }
 
-    public applyRule(ruleIndex: integer, targetString: Symbol[], targetIndex: integer): Symbol[] | null {
-        const rule = this.rules[ruleIndex]
-        const result = rule.apply(targetString, targetIndex)
-        this.actionHistory.push(new RuleAction(rule, targetString, targetIndex, result !== null))
-        if (this.onApplyRuleAction !== undefined) {
-            this.onApplyRuleAction(rule)
+    public activateRule(ruleIndex: integer | null) {
+        if (this._activeRuleIndex === ruleIndex) {
+            this._activeRuleIndex = null
+        } else {
+            this._activeRuleIndex = ruleIndex
         }
-        return result
+        this.onUpdateActiveRule(ruleIndex)
     }
 
-    public getActionHistoryData() {
-        const symbolToString = (sym: Symbol) => {
-            return sym.id
-        }
-        return this.actionHistory.map((ra) => {
-            const inputSymbols = ra.rule.input.map(symbolToString)
-            const outputSymbols = ra.rule.input.map(symbolToString)
-            const targetString = ra.targetString.map(symbolToString)
-            return { "rule": { "input": inputSymbols, "output": outputSymbols }, "targetString": targetString, "targetIndex": ra.targetIndex, "successful": ra.successful }
-        })
+    public get activeRuleIndex():integer|null{
+        return this._activeRuleIndex
     }
 
 }
@@ -39,9 +25,12 @@ export class RulePanelState {
 class RuleSubpanelGraphics {
     private maxSymbolSize: number;
     private interactionArea: Phaser.GameObjects.Rectangle;
+    private activeIndicator: Phaser.GameObjects.Rectangle;
 
-    constructor(private scene: Phaser.Scene, private symbolFactory: SymbolFactory, private x: number, private y: number, private width: number, private height: number, private maxStringLength: integer, private rule: TransformationRule, onPress: () => void) {
-        
+    constructor(private scene: Phaser.Scene, private symbolFactory: SymbolFactory, private x: number, private y: number, private width: number, private height: number, private maxStringLength: integer, private rule: TransformationRule, onPress: () => void, private _isActive: boolean) {
+        this.activeIndicator = this.scene.add.rectangle(this.x + this.width / 2, this.y + this.height / 2, this.width, this.height, 0xff0000, 0.5);
+        this.activeIndicator.setVisible(false)
+
         const maxSymbolWidth = this.width / this.maxStringLength
         const maxSymbolHeight = this.height
         this.maxSymbolSize = Math.min(maxSymbolWidth, maxSymbolHeight)
@@ -66,13 +55,24 @@ class RuleSubpanelGraphics {
             this.symbolFactory.createSymbolImage(this.scene, symbol, this.x + j * this.maxSymbolSize, this.y, this.maxSymbolSize, true)
             j += 1
         }
+    }
 
+    public get isActive(): boolean {
+        return this._isActive;
+    }
+    public set isActive(value: boolean) {
+        this._isActive = value;
+        if (this._isActive) {
+            this.activeIndicator.setVisible(true)
+        } else {
+            this.activeIndicator.setVisible(false)
+        }
     }
 }
 
 export class RulePanelGraphics {
     private maxSymbolSize: number;
-    private onRulePress: (ruleIndex:integer) => void
+    private onRulePress: (ruleIndex: integer) => void
     private interactionArea: Phaser.GameObjects.Rectangle;
     ruleSubpanelGraphics: RuleSubpanelGraphics[];
 
@@ -86,7 +86,7 @@ export class RulePanelGraphics {
         this.ruleSubpanelGraphics = []
 
         this.rules.forEach((r, i) => {
-            const subpanel = new RuleSubpanelGraphics(this.scene, this.symbolFactory, this.x, this.y + i * this.maxSymbolSize, this.width, this.maxSymbolSize, this.maxStringLength, r, () => this.onPress(i))
+            const subpanel = new RuleSubpanelGraphics(this.scene, this.symbolFactory, this.x, this.y + i * this.maxSymbolSize, this.width, this.maxSymbolSize, this.maxStringLength, r, () => this.onPress(i), false)
             this.ruleSubpanelGraphics.push(subpanel)
         })
     }
@@ -101,5 +101,18 @@ export class RulePanelGraphics {
         }
     }
 
+    public setActiveSubpanel(ruleIndex: integer | null) {
+        this.ruleSubpanelGraphics.forEach((rsp, i) => {
+            if (i === ruleIndex) {
+                if (!rsp.isActive) {
+                    rsp.isActive = true
+                } else {
+                    rsp.isActive = false
+                }
+            } else {
+                rsp.isActive = false
+            }
+        })
+    }
 
 }

@@ -24,6 +24,14 @@ export class StringPanelState {
         this.onStateChange(newState)
     }
 
+    public activateSymbol(symbolIndex: integer) {
+        if (this.currentState.currentActiveIndex !== symbolIndex) {
+            this.currentState = new StringState(this.currentState.currentString, symbolIndex)
+        } else {
+            this.currentState = new StringState(this.currentState.currentString, null)
+        }
+    }
+
     public getStateHistoryData() {
         return this.stateHistory.map((str) => {
             const symbolList = str.currentString.map((sym) => {
