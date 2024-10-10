@@ -1,6 +1,6 @@
 import { GameObjects } from 'phaser';
 import BaseScene from './BaseScene';
-import { GAME_HEIGHT, GAME_WIDTH, SYMBOL_SIZE } from '../constants/GameConstants';
+import { GAME_HEIGHT, GAME_WIDTH } from '../constants/GameConstants';
 import { SymbolFactory } from '../task/SymbolFactory';
 import { TransformationRule } from '../task/StringTransformation';
 import { TaskTrialStringTransformation } from '../task/TaskTrialStringTransformation';
@@ -49,8 +49,11 @@ export class TestScene extends BaseScene
         const string_1 = ["2", "2", "1", "3", "4", "2"]
         const string_1_symbols = symbolFactory.getSymbolsByIDs(string_1)
 
+        // A target string
+        const targetString = symbolFactory.getSymbolsByIDs(["1", "3", "4"])
+
         // The task instance handling state, graphics, and interaction
-        const task = new TaskTrialStringTransformation(this, [r1, r2], new StringState(string_1_symbols, null), symbolFactory)
+        const task = new TaskTrialStringTransformation(this, [r1, r2], new StringState(string_1_symbols, null), targetString, symbolFactory)
         
         super.create()
     }

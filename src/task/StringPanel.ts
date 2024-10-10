@@ -1,5 +1,6 @@
 import { SymbolFactory } from "./SymbolFactory";
 import { Symbol } from "./StringTransformation";
+import { MAX_SYMBOL_SIZE } from "../constants/GameConstants";
 
 export class StringState {
     constructor(public currentString: Symbol[], public currentActiveIndex: integer | null) {
@@ -53,7 +54,7 @@ export class StringPanelGraphics {
         const interactionArea = this.scene.add.rectangle(this.x + this.width / 2, this.y + this.height / 2, this.width, this.height, 0x000000, 0.5);
         const maxSymbolWidth = this.width / this.maxStringLength
         const maxSymbolHeight = this.height
-        this.maxSymbolSize = Math.min(maxSymbolWidth, maxSymbolHeight)
+        this.maxSymbolSize = Math.min(maxSymbolWidth, maxSymbolHeight, MAX_SYMBOL_SIZE)
 
         this.symbolStringImages = []
         this.activeSymbolImage = this.scene.add.image(0, 0, "active_symbol_indicator").setOrigin(0)

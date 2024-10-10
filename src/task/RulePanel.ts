@@ -1,5 +1,6 @@
 import { SymbolFactory } from "./SymbolFactory";
 import { TransformationRule } from "./StringTransformation";
+import { MAX_SYMBOL_SIZE } from "../constants/GameConstants";
 
 export class RulePanelState {
     private _activeRuleIndex: integer | null
@@ -33,7 +34,7 @@ class RuleSubpanelGraphics {
 
         const maxSymbolWidth = this.width / this.maxStringLength
         const maxSymbolHeight = this.height
-        this.maxSymbolSize = Math.min(maxSymbolWidth, maxSymbolHeight)
+        this.maxSymbolSize = Math.min(maxSymbolWidth, maxSymbolHeight, MAX_SYMBOL_SIZE)
         this.createImages(this.rule)
 
         this.interactionArea = this.scene.add.rectangle(this.x + this.width / 2, this.y + this.height / 2, this.width, this.height, 0x000000, 0);
