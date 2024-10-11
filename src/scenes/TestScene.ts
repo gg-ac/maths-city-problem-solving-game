@@ -52,8 +52,13 @@ export class TestScene extends BaseScene
         // A target string
         const targetString = symbolFactory.getSymbolsByIDs(["1", "3", "4"])
 
+        // Some forbidden strings
+        const forbiddenString1 = symbolFactory.getSymbolsByIDs(["3", "1", "4"])
+        const forbiddenString2 = symbolFactory.getSymbolsByIDs(["4", "2", "3", "1"])
+        const forbiddenString3 = symbolFactory.getSymbolsByIDs(["2", "1", "1", "4"])
+
         // The task instance handling state, graphics, and interaction
-        const task = new TaskTrialStringTransformation(this, [r1, r2], new StringState(string_1_symbols, null), targetString, symbolFactory)
+        const task = new TaskTrialStringTransformation(this, [r1, r2], new StringState(string_1_symbols, null), targetString, [forbiddenString1, forbiddenString2, forbiddenString3], symbolFactory)
         
         super.create()
     }

@@ -37,6 +37,8 @@ export class Preloader extends Scene
 
         this.load.image('logo', 'logo.png');        
         this.load.image('active_symbol_indicator', 'symbols/symbol_selection_box.png');
+
+        // Symbols
         this.load.image('arrow', 'symbols/arrow.png');
         this.load.image('s1', 'symbols/shape_s1.png');
         this.load.image('s2', 'symbols/shape_s2.png');
@@ -44,6 +46,10 @@ export class Preloader extends Scene
         this.load.image('s4', 'symbols/shape_s4.png');
         this.load.image('sg1', 'symbols/shape_sg1.png');
         this.load.image('sg2', 'symbols/shape_sg2.png');
+
+        // User Interface
+        this.load.image('bg-rule-button-up', "ui/rule_button_bg_up.png")
+        this.load.image('bg-rule-button-down', "ui/rule_button_bg_down.png")
        
     }
 
