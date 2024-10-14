@@ -19,8 +19,7 @@ export class TestScene extends BaseScene
 
     create ()
     {
-        this.background = this.add.image(GAME_WIDTH/2, GAME_HEIGHT/2, 'background');
-        this.background.setDisplaySize(GAME_WIDTH, GAME_HEIGHT)
+       
 
         // this.title = this.add.text(20, 40, 'Hello', {
         //     fontFamily: 'Corbel', fontSize: 46, color: '#ffffff',
@@ -54,11 +53,11 @@ export class TestScene extends BaseScene
 
         // Some forbidden strings
         const forbiddenString1 = symbolFactory.getSymbolsByIDs(["3", "1", "4"])
-        const forbiddenString2 = symbolFactory.getSymbolsByIDs(["4", "2", "3", "1"])
-        const forbiddenString3 = symbolFactory.getSymbolsByIDs(["2", "1", "1", "4"])
+        // const forbiddenString2 = symbolFactory.getSymbolsByIDs(["4", "2", "3", "1"])
+        // const forbiddenString3 = symbolFactory.getSymbolsByIDs(["2", "1", "1", "4"])
 
         // The task instance handling state, graphics, and interaction
-        const task = new TaskTrialStringTransformation(this, [r1, r2], new StringState(string_1_symbols, null), targetString, [forbiddenString1, forbiddenString2, forbiddenString3], symbolFactory)
+        const task = new TaskTrialStringTransformation(this, [r2, r1], new StringState(string_1_symbols, null), targetString, [forbiddenString1], symbolFactory)
         
         super.create()
     }

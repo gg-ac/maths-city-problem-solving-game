@@ -10,9 +10,7 @@ export class Preloader extends Scene
 
     init ()
     {
-        //  We loaded this image in our Boot Scene, so we can display it here
-        this.add.image(512, 384, 'background');
-
+        
         //  A simple progress bar. This is the outline of the bar.
         this.add.rectangle(512, 384, 468, 32).setStrokeStyle(1, 0xffffff);
 
@@ -50,6 +48,12 @@ export class Preloader extends Scene
         // User Interface
         this.load.image('bg-rule-button-up', "ui/rule_button_bg_up.png")
         this.load.image('bg-rule-button-down', "ui/rule_button_bg_down.png")
+        this.load.image('bg-rule-button-up-light', "ui/rule_button_bg_up_light.png")
+        this.load.image('bg-rule-button-down-light', "ui/rule_button_bg_down_light.png")
+        this.load.image('bg-unused-symbol-space', "ui/unused_symbol_space.png")
+        this.load.image('bg-area-l', "ui/panel_light.png")
+        this.load.image('bg-area-m', "ui/panel_mid.png")
+        this.load.image('bg-area-d', "ui/panel_dark.png")
        
     }
 
