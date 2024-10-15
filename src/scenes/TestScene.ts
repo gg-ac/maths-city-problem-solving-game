@@ -5,6 +5,7 @@ import { SymbolFactory } from '../task/SymbolFactory';
 import { TransformationRule } from '../task/StringTransformation';
 import { TaskTrialStringTransformation } from '../task/TaskTrialStringTransformation';
 import { StringState } from '../task/StringPanel';
+import { GazeAperture } from '../task/GazeAperture';
 
 export class TestScene extends BaseScene
 {
@@ -20,6 +21,8 @@ export class TestScene extends BaseScene
     create ()
     {
        
+        
+        
 
         // this.title = this.add.text(20, 40, 'Hello', {
         //     fontFamily: 'Corbel', fontSize: 46, color: '#ffffff',
@@ -58,6 +61,10 @@ export class TestScene extends BaseScene
 
         // The task instance handling state, graphics, and interaction
         const task = new TaskTrialStringTransformation(this, [r2, r1], new StringState(string_1_symbols, null), targetString, [forbiddenString1], symbolFactory)
+
+        const gazeAperture = new GazeAperture(this, 100)
+        gazeAperture.setActive(false)
+        
         
         super.create()
     }

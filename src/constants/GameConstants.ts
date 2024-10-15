@@ -36,3 +36,10 @@ export const STATE_SYMBOL_VERTICAL_MARGIN = 10
 export const STATE_AREA_MARGIN = 20
 
 export const EXTRA_OVERLAP_HEIGHT = 300
+export const STATE_SUBPANEL_EXTRA_MARGIN = 30
+export const STATE_SYMBOL_PAD_TARGET = 20
+
+export const ICON_SIZE = 150
+
+
+export const OVERLAY_ALPHA = 0.75

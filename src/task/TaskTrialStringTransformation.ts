@@ -5,6 +5,7 @@ import { StringPanelGraphics, StringPanelState, StringState } from "./StringPane
 import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
+import { OverlayCamera } from "./OverlayCamera";
 
 
 enum TrialState {
@@ -32,26 +33,33 @@ export class TaskTrialStringTransformation {
 
         this.trialState = TrialState.Initialising
 
-        this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.stringPanel, 7)
+        const overlayCamera = new OverlayCamera(0, 0, this.scene.cameras.main.width, this.scene.cameras.main.height)
+        this.scene.cameras.addExisting(overlayCamera)
+        overlayCamera.setScene(this.scene)
+
+        this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.stringPanel, 7, overlayCamera)
         this.stringPanelState = new StringPanelState(this.startState, (newState) => this.onStringPanelStateChange(newState))
         this.stringPanelGraphics.setOnSymbolPress((index) => this.onStringPanelSymbolPressed(index))
 
-        this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.rulePanel, 5, this.rules)
+        this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.rulePanel, 5, this.rules, overlayCamera)
         this.rulePanelState = new RulePanelState((index) => this.onActiveRuleChange(index))
         this.rulePanelGraphics.setOnRulePress((index) => this.onRulePanelRulePressed(index))
 
-        this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, 7)
+        this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, overlayCamera)
         this.targetStringGraphics.positionBelow(this.stringPanelGraphics.background)
 
         this.forbiddenStringGraphics = []
         const forbiddenStringRowHeight = PANEL_SECTION_HEIGHTS.forbiddenStringPanel / this.forbiddenStrings.length
         this.forbiddenStrings.forEach((string, index) => {
-            const newForbiddenStringGraphics = new ForbiddenStringGraphics(this.scene, string, this.symbolFactory, 0, forbiddenStringRowHeight * index, GAME_WIDTH, forbiddenStringRowHeight, 7)
+            const newForbiddenStringGraphics = new ForbiddenStringGraphics(this.scene, string, this.symbolFactory, 0, forbiddenStringRowHeight * index, GAME_WIDTH, forbiddenStringRowHeight, overlayCamera)
             this.forbiddenStringGraphics.push(newForbiddenStringGraphics)
             newForbiddenStringGraphics.positionBelow(this.stringPanelGraphics.background)
         })
 
+        overlayCamera.updateOverlay()
+
         this.trialState = TrialState.InProgress
+        
 
     }
 
@@ -100,8 +108,12 @@ export class TaskTrialStringTransformation {
 
         if (rule !== null && targetIndex !== null) {
             const result = rule.apply(this.stringPanelState.currentState.currentString, targetIndex)
+            
 
             if (result !== null) {
+                // Indices of the symbols which "came out" of the rule application
+                const changedIndices = rule.output.map((_, i) => {return targetIndex + i})
+
                 const forbiddenStringMatchIndex = this.isStringForbidden(result)
                 if (forbiddenStringMatchIndex !== -1) {
                     // If the resulting state would be a forbidden state, don't update current state
@@ -117,6 +129,7 @@ export class TaskTrialStringTransformation {
                     this.stringPanelState.currentState = new StringState(result, null)
                     console.log("Rule application: Succeeded")
                     this.rulePanelState.activateRule(null)
+                    changedIndices.forEach((index, i) => {this.stringPanelGraphics.jumpSymbol(index, i*50)})
                 }
             } else {
                 this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, null)

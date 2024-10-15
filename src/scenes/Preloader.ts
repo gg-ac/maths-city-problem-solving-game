@@ -50,10 +50,16 @@ export class Preloader extends Scene
         this.load.image('bg-rule-button-down', "ui/rule_button_bg_down.png")
         this.load.image('bg-rule-button-up-light', "ui/rule_button_bg_up_light.png")
         this.load.image('bg-rule-button-down-light', "ui/rule_button_bg_down_light.png")
+        this.load.image('bg-rule-button-up-light-transparent', "ui/rule_button_bg_up_light_transparent.png")
+        this.load.image('bg-rule-button-down-light-transparent', "ui/rule_button_bg_down_light_transparent.png")
         this.load.image('bg-unused-symbol-space', "ui/unused_symbol_space.png")
+        this.load.image('bg-unused-symbol-space-light', "ui/unused_symbol_space_light.png")
         this.load.image('bg-area-l', "ui/panel_light.png")
         this.load.image('bg-area-m', "ui/panel_mid.png")
         this.load.image('bg-area-d', "ui/panel_dark.png")
+        this.load.image('bg-area-outline', "ui/panel_outline.png")
+        this.load.image('icon-forbidden', "ui/icon_forbidden.png")
+        this.load.image('icon-target', "ui/icon_target.png")
        
     }
 
