@@ -6,6 +6,7 @@ import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
 import { OverlayCamera } from "./OverlayCamera";
+import { DataStore, EventType, TaskStateData } from "./DataStorage";
 
 
 enum TrialState {
@@ -29,7 +30,7 @@ export class TaskTrialStringTransformation {
 
     private trialState: TrialState
 
-    constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory) {
+    constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory, private dataStore: DataStore, private onTrialComplete: () => void) {
 
         this.trialState = TrialState.Initialising
 
@@ -38,11 +39,11 @@ export class TaskTrialStringTransformation {
         overlayCamera.setScene(this.scene)
 
         this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.stringPanel, 7, overlayCamera)
-        this.stringPanelState = new StringPanelState(this.startState, (newState) => this.onStringPanelStateChange(newState))
+        this.stringPanelState = new StringPanelState(this.startState, (newState, manualChange) => this.onStringPanelStateChange(newState, manualChange))
         this.stringPanelGraphics.setOnSymbolPress((index) => this.onStringPanelSymbolPressed(index))
 
         this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.rulePanel, 5, this.rules, overlayCamera)
-        this.rulePanelState = new RulePanelState((index) => this.onActiveRuleChange(index))
+        this.rulePanelState = new RulePanelState((index, manualChange) => this.onActiveRuleChange(index, manualChange))
         this.rulePanelGraphics.setOnRulePress((index) => this.onRulePanelRulePressed(index))
 
         this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, overlayCamera)
@@ -59,47 +60,46 @@ export class TaskTrialStringTransformation {
         overlayCamera.updateOverlay()
 
         this.trialState = TrialState.InProgress
-        
+        this.dataStore.startNewTrial()
+        this.dataStore.addEvent(EventType.START_TRIAL, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
 
     }
 
-    private onStringPanelStateChange(newState: StringState) {
+    private onStringPanelStateChange(newState: StringState, manualChange:boolean) {
         if (this.trialState === TrialState.Initialising || this.trialState === TrialState.InProgress) {
 
-            // if(this.stringPanelState === undefined){
-            //     console.log("New string (undefined)")
-            //     this.stringPanelGraphics.setSymbolString(newState.currentString)
-            // }else if(newState.currentString !== this.stringPanelState.currentState.currentString){
-            //     console.log("New string (replaced)")
-            //     this.stringPanelGraphics.setSymbolString(newState.currentString)
-            // }
             this.stringPanelGraphics.setSymbolString(newState.currentString)
             this.stringPanelGraphics.setActiveSymbolIndex(newState.currentActiveIndex)
+
+            if (this.trialState === TrialState.InProgress) {
+                this.dataStore.addEvent(EventType.SELECT_SYMBOL, manualChange, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+            }
         }
     }
 
     private onStringPanelSymbolPressed(index: integer) {
         if (this.trialState == TrialState.InProgress) {
-            this.stringPanelState.activateSymbol(index);
+            this.stringPanelState.activateSymbol(index, true);
             this.tryApplyCurrentRule()
         }
     }
 
-    private onActiveRuleChange(index: integer | null) {
+    private onActiveRuleChange(index: integer | null, manualChange:boolean) {
         if (this.trialState == TrialState.InProgress) {
             this.rulePanelGraphics.setActiveSubpanel(index)
+            this.dataStore.addEvent(EventType.SELECT_RULE, manualChange, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
         }
     }
 
     private onRulePanelRulePressed(index: integer) {
         if (this.trialState == TrialState.InProgress) {
-            this.rulePanelState.activateRule(index)
+            this.rulePanelState.activateRule(index, true)
             this.tryApplyCurrentRule()
         }
     }
 
     private tryApplyCurrentRule() {
-        const targetIndex = this.stringPanelState.currentState.currentActiveIndex
+        const targetIndex = this.stringPanelState.getCurrentState().currentActiveIndex
         const ruleIndex = this.rulePanelState.activeRuleIndex
         let rule: TransformationRule | null = null
         if (ruleIndex !== null) {
@@ -107,33 +107,41 @@ export class TaskTrialStringTransformation {
         }
 
         if (rule !== null && targetIndex !== null) {
-            const result = rule.apply(this.stringPanelState.currentState.currentString, targetIndex)
-            
+            const result = rule.apply(this.stringPanelState.getCurrentState().currentString, targetIndex)
+
 
             if (result !== null) {
                 // Indices of the symbols which "came out" of the rule application
-                const changedIndices = rule.output.map((_, i) => {return targetIndex + i})
+                const changedIndices = rule.output.map((_, i) => { return targetIndex + i })
 
                 const forbiddenStringMatchIndex = this.isStringForbidden(result)
                 if (forbiddenStringMatchIndex !== -1) {
+                    
+                    this.dataStore.addEvent(EventType.FORBIDDEN_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+                    
                     // If the resulting state would be a forbidden state, don't update current state
-                    console.log(`Cannot apply rule: resulting state would be forbidden state ${forbiddenStringMatchIndex}`)                    
-                    this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, null)
-                    this.rulePanelState.activateRule(null)
+                    console.log(`Cannot apply rule: resulting state would be forbidden state ${forbiddenStringMatchIndex}`)
+                    this.stringPanelState.setCurrentState(new StringState(this.stringPanelState.getCurrentState().currentString, null), false)
+                    this.rulePanelState.activateRule(null, false)
                     if (ruleIndex !== null) {
                         this.rulePanelGraphics.animateRuleShake(ruleIndex)
                         this.forbiddenStringGraphics[forbiddenStringMatchIndex].animateStringShake()
                     }
                 } else {
-                    // Otherwise, update the current state                
-                    this.stringPanelState.currentState = new StringState(result, null)
+                    // Otherwise, update the current state       
+                    this.dataStore.addEvent(EventType.SUCCESSFUL_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, new StringState(result, this.stringPanelState?.getCurrentState().currentActiveIndex)))
+                             
+                    this.stringPanelState.setCurrentState(new StringState(result, null), false)
+                     
                     console.log("Rule application: Succeeded")
-                    this.rulePanelState.activateRule(null)
-                    changedIndices.forEach((index, i) => {this.stringPanelGraphics.jumpSymbol(index, i*50)})
+                    this.rulePanelState.activateRule(null, false)
+                    changedIndices.forEach((index, i) => { this.stringPanelGraphics.jumpSymbol(index, i * 50) })
                 }
             } else {
-                this.stringPanelState.currentState = new StringState(this.stringPanelState.currentState.currentString, null)
-                this.rulePanelState.activateRule(null)
+                this.dataStore.addEvent(EventType.INVALID_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+                    
+                this.stringPanelState.setCurrentState(new StringState(this.stringPanelState.getCurrentState().currentString, null), false)
+                this.rulePanelState.activateRule(null, false)
                 if (ruleIndex !== null) {
                     this.rulePanelGraphics.animateRuleShake(ruleIndex)
                 }
@@ -143,15 +151,20 @@ export class TaskTrialStringTransformation {
 
         if (this.checkTargetAcheived()) {
             console.log("Trial completed!")
-            if(this.trialState !== TrialState.Completed){
+            if (this.trialState !== TrialState.Completed) {
                 this.targetStringGraphics.jumpSymbols()
             }
-            this.trialState = TrialState.Completed
+            if(this.trialState !== TrialState.Completed){
+                this.trialState = TrialState.Completed
+                this.dataStore.addEvent(EventType.GOAL_ACHIEVED, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+                this.onTrialComplete()
+            }
+             
         }
     }
 
     private checkTargetAcheived() {
-        const currentString = this.stringPanelState.currentState.currentString
+        const currentString = this.stringPanelState.getCurrentState().currentString
         return this.symbolArraysMatch(currentString, this.targetString)
     }
 

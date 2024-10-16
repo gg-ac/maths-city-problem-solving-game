@@ -22,7 +22,6 @@ export class OverlayCamera extends Phaser.Cameras.Scene2D.Camera {
             for (const child of this.scene.children.list) {
                 if (!this.overlayObjects.has(child)) {
                     toIgnore.push(child)
-                    console.log(`ignoring ${child}`)
                 }
             }
         }

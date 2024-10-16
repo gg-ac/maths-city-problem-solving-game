@@ -1,17 +1,18 @@
 import { GameObjects } from 'phaser';
 import BaseScene from './BaseScene';
-import { GAME_HEIGHT, GAME_WIDTH } from '../constants/GameConstants';
 import { SymbolFactory } from '../task/SymbolFactory';
 import { TransformationRule } from '../task/StringTransformation';
 import { TaskTrialStringTransformation } from '../task/TaskTrialStringTransformation';
 import { StringState } from '../task/StringPanel';
 import { GazeAperture } from '../task/GazeAperture';
+import { DataStore } from '../task/DataStorage';
 
 export class TestScene extends BaseScene
 {
     background: GameObjects.Image;
     title: GameObjects.Text;
     orientation_warning_text: GameObjects.Text;
+    dataStore: DataStore;
 
     constructor ()
     {
@@ -46,10 +47,11 @@ export class TestScene extends BaseScene
         const r2_in = symbolFactory.getSymbolsByIDs(["5", "6"])
         const r2_out = symbolFactory.getSymbolsByIDs(["6", "5"])
         const r2 = new TransformationRule(r2_in, r2_out)
+        const rules = [r2, r1]
 
         // An initial string
         const string_1 = ["2", "2", "1", "3", "4", "2"]
-        const string_1_symbols = symbolFactory.getSymbolsByIDs(string_1)
+        const start_string = symbolFactory.getSymbolsByIDs(string_1)
 
         // A target string
         const targetString = symbolFactory.getSymbolsByIDs(["1", "3", "4"])
@@ -59,13 +61,36 @@ export class TestScene extends BaseScene
         // const forbiddenString2 = symbolFactory.getSymbolsByIDs(["4", "2", "3", "1"])
         // const forbiddenString3 = symbolFactory.getSymbolsByIDs(["2", "1", "1", "4"])
 
+        
+        this.dataStore = new DataStore("test_participant", rules, start_string, targetString, [forbiddenString1])
+
         // The task instance handling state, graphics, and interaction
-        const task = new TaskTrialStringTransformation(this, [r2, r1], new StringState(string_1_symbols, null), targetString, [forbiddenString1], symbolFactory)
+        const task = new TaskTrialStringTransformation(this, rules, new StringState(start_string, null), targetString, [forbiddenString1], symbolFactory, this.dataStore, () => this.onTrialComplete())
 
         const gazeAperture = new GazeAperture(this, 100)
         gazeAperture.setActive(false)
         
         
         super.create()
+    }
+
+    onTrialComplete(){        
+
+        // Convert the object to a JSON string
+        const jsonData = JSON.stringify(this.dataStore.toObject(), null, 2); // Pretty-printing
+
+        // Create a Blob from the JSON string
+        const blob = new Blob([jsonData], { type: 'application/json' });
+
+        // Create a link element
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'data.json';
+
+        // Programmatically click the link to trigger the download
+        link.click();
+
+        // Clean up the URL object
+        URL.revokeObjectURL(link.href);
     }
 }

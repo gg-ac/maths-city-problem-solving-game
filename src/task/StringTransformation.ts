@@ -8,6 +8,13 @@ export class Symbol {
         }
         return s.id === this.id
     }
+
+    toObject(){
+        return {
+            "symbolID":this.id,
+            "isGeneric":this.isGeneric
+        }
+    }
 }
 
 export class TransformationRule {
@@ -29,6 +36,13 @@ export class TransformationRule {
             throw new Error(`Output cannot contain generic symbols which do not also exist in the input`)
         }
 
+    }
+
+    toObject(){
+        return {
+            "input":this.input.map((i) => i.toObject()),            
+            "output":this.output.map((i) => i.toObject())
+        }
     }
 
     get input(): Symbol[] {

@@ -9,28 +9,28 @@ export class StringState {
 }
 
 export class StringPanelState {
-    private _currentState: StringState;
+    private currentState: StringState;
 
     private stateHistory: StringState[];
-    constructor(private initialState: StringState, private onStateChange: (newState: StringState) => void) {
+    constructor(private initialState: StringState, private onStateChange: (newState: StringState, manualChange:boolean) => void) {
         this.stateHistory = []
-        this.currentState = this.initialState
+        this.setCurrentState(this.initialState, false)
     }
 
-    public get currentState(): StringState {
-        return this._currentState;
+    getCurrentState(): StringState {
+        return this.currentState;
     }
-    public set currentState(newState: StringState) {
-        this._currentState = newState;
+    setCurrentState(newState: StringState, manualChange:boolean) {
+        this.currentState = newState;
         this.stateHistory.push(newState)
-        this.onStateChange(newState)
+        this.onStateChange(newState, manualChange)
     }
 
-    public activateSymbol(symbolIndex: integer) {
-        if (this.currentState.currentActiveIndex !== symbolIndex) {
-            this.currentState = new StringState(this.currentState.currentString, symbolIndex)
+    public activateSymbol(symbolIndex: integer, manualChange:boolean) {
+        if (this.getCurrentState().currentActiveIndex !== symbolIndex) {
+            this.setCurrentState(new StringState(this.getCurrentState().currentString, symbolIndex), manualChange)
         } else {
-            this.currentState = new StringState(this.currentState.currentString, null)
+            this.setCurrentState(new StringState(this.getCurrentState().currentString, null), manualChange)
         }
     }
 
@@ -42,7 +42,6 @@ export class StringPanelState {
             return { "symbols": symbolList, "activeIndex": str.currentActiveIndex }
         })
     }
-
 }
 
 export class StringPanelGraphics {
@@ -113,9 +112,7 @@ export class StringPanelGraphics {
     pressEvent(symbolIndex: integer) {
         if (this.onSymbolPress) {
             this.onSymbolPress(symbolIndex)
-            console.log(`pressed ${symbolIndex}`)
         }
-
     }
 
     jumpSymbol(symbolIndex: integer, delay: number) {
@@ -204,13 +201,11 @@ export class StringPanelGraphics {
             this.symbolBackgroundDownImages.forEach((img, i) => {
 
                 if (i === symbolIndex) {
-                    console.log(i, symbolIndex, "A")
                     img.setVisible(true)
                     this.symbolBackgroundDownImagesOverlay[i].setVisible(true)
                     this.symbolStringImages[i].setY(this.centredY + STATE_SYMBOL_PAD + this.pressVerticalOffset)
                 }
                 else {
-                    console.log(i, symbolIndex, "B")
                     img.setVisible(false)
                     this.symbolBackgroundDownImagesOverlay[i].setVisible(false)
                     this.symbolStringImages[i].setY(this.centredY + STATE_SYMBOL_PAD)

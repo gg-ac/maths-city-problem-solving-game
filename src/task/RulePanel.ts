@@ -5,17 +5,17 @@ import { OverlayCamera } from "./OverlayCamera";
 
 export class RulePanelState {
     private _activeRuleIndex: integer | null
-    constructor(private onUpdateActiveRule: (ruleIndex: integer | null) => void) {
+    constructor(private onUpdateActiveRule: (ruleIndex: integer | null, manualChange:boolean) => void) {
         this._activeRuleIndex = null
     }
 
-    public activateRule(ruleIndex: integer | null) {
+    public activateRule(ruleIndex: integer | null, manualChange:boolean) {
         if (this._activeRuleIndex === ruleIndex) {
             this._activeRuleIndex = null
         } else {
             this._activeRuleIndex = ruleIndex
         }
-        this.onUpdateActiveRule(ruleIndex)
+        this.onUpdateActiveRule(ruleIndex, manualChange)
     }
 
     public get activeRuleIndex(): integer | null {
