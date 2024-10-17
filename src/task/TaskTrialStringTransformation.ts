@@ -1,4 +1,4 @@
-import { GAME_HEIGHT, GAME_WIDTH, PANEL_SECTION_HEIGHTS } from "../constants/GameConstants";
+import { GAME_HEIGHT, GAME_WIDTH, MAX_INTERACTIONS_PER_TRIAL, PANEL_SECTION_HEIGHTS } from "../constants/GameConstants";
 import { RulePanelGraphics, RulePanelState } from "./RulePanel";
 import { SymbolFactory } from "./SymbolFactory";
 import { StringPanelGraphics, StringPanelState, StringState } from "./StringPanel";
@@ -6,7 +6,7 @@ import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
 import { OverlayCamera } from "./OverlayCamera";
-import { DataStore, EventType, TaskStateData } from "./DataStorage";
+import { DataStore, EventRuleApply, EventSelect, EventTaskStatus, EventType } from "./DataStorage";
 
 
 enum TrialState {
@@ -29,10 +29,14 @@ export class TaskTrialStringTransformation {
     private forbiddenStringGraphics: ForbiddenStringGraphics[];
 
     private trialState: TrialState
+    actionCounter: number;
 
     constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory, private dataStore: DataStore, private onTrialComplete: () => void) {
 
         this.trialState = TrialState.Initialising
+
+        // A counter for interaction events, used to put a cap on the number of actions
+        this.actionCounter = 0
 
         const overlayCamera = new OverlayCamera(0, 0, this.scene.cameras.main.width, this.scene.cameras.main.height)
         this.scene.cameras.addExisting(overlayCamera)
@@ -61,40 +65,46 @@ export class TaskTrialStringTransformation {
 
         this.trialState = TrialState.InProgress
         this.dataStore.startNewTrial()
-        this.dataStore.addEvent(EventType.START_TRIAL, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+        this.dataStore.addEvent(new EventTaskStatus(EventType.START_TRIAL))
 
     }
 
-    private onStringPanelStateChange(newState: StringState, manualChange:boolean) {
+    private onStringPanelStateChange(newState: StringState, manualChange: boolean) {
         if (this.trialState === TrialState.Initialising || this.trialState === TrialState.InProgress) {
 
             this.stringPanelGraphics.setSymbolString(newState.currentString)
             this.stringPanelGraphics.setActiveSymbolIndex(newState.currentActiveIndex)
 
             if (this.trialState === TrialState.InProgress) {
-                this.dataStore.addEvent(EventType.SELECT_SYMBOL, manualChange, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+                this.dataStore.addEvent(new EventSelect(EventType.SELECT_SYMBOL, this.stringPanelState?.getCurrentState().currentActiveIndex, manualChange, this.stringPanelState?.getCurrentState().currentString))
             }
         }
     }
 
     private onStringPanelSymbolPressed(index: integer) {
-        if (this.trialState == TrialState.InProgress) {
-            this.stringPanelState.activateSymbol(index, true);
-            this.tryApplyCurrentRule()
+        if (this.actionCounter < MAX_INTERACTIONS_PER_TRIAL) {
+            if (this.trialState == TrialState.InProgress) {
+                this.stringPanelState.activateSymbol(index, true);
+                this.actionCounter++
+                this.tryApplyCurrentRule()
+            }
         }
     }
 
-    private onActiveRuleChange(index: integer | null, manualChange:boolean) {
+    private onActiveRuleChange(index: integer | null, manualChange: boolean) {
         if (this.trialState == TrialState.InProgress) {
             this.rulePanelGraphics.setActiveSubpanel(index)
-            this.dataStore.addEvent(EventType.SELECT_RULE, manualChange, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+            this.dataStore.addEvent(new EventSelect(EventType.SELECT_RULE, this.rulePanelState?.activeRuleIndex, manualChange))
         }
     }
 
     private onRulePanelRulePressed(index: integer) {
-        if (this.trialState == TrialState.InProgress) {
-            this.rulePanelState.activateRule(index, true)
-            this.tryApplyCurrentRule()
+        if (this.actionCounter < MAX_INTERACTIONS_PER_TRIAL) {
+            if (this.trialState == TrialState.InProgress) {
+                this.rulePanelState.activateRule(index, true)
+                this.actionCounter++
+                this.tryApplyCurrentRule()
+            }
         }
     }
 
@@ -107,6 +117,7 @@ export class TaskTrialStringTransformation {
         }
 
         if (rule !== null && targetIndex !== null) {
+            const startString = this.stringPanelState.getCurrentState().currentString
             const result = rule.apply(this.stringPanelState.getCurrentState().currentString, targetIndex)
 
 
@@ -116,9 +127,9 @@ export class TaskTrialStringTransformation {
 
                 const forbiddenStringMatchIndex = this.isStringForbidden(result)
                 if (forbiddenStringMatchIndex !== -1) {
-                    
-                    this.dataStore.addEvent(EventType.FORBIDDEN_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
-                    
+
+                    this.dataStore.addEvent(new EventRuleApply(EventType.FORBIDDEN_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined, undefined, forbiddenStringMatchIndex))
+
                     // If the resulting state would be a forbidden state, don't update current state
                     console.log(`Cannot apply rule: resulting state would be forbidden state ${forbiddenStringMatchIndex}`)
                     this.stringPanelState.setCurrentState(new StringState(this.stringPanelState.getCurrentState().currentString, null), false)
@@ -128,18 +139,19 @@ export class TaskTrialStringTransformation {
                         this.forbiddenStringGraphics[forbiddenStringMatchIndex].animateStringShake()
                     }
                 } else {
-                    // Otherwise, update the current state       
-                    this.dataStore.addEvent(EventType.SUCCESSFUL_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, new StringState(result, this.stringPanelState?.getCurrentState().currentActiveIndex)))
-                             
+                    // Otherwise, update the current state                           
+                    this.dataStore.addEvent(new EventRuleApply(EventType.SUCCESSFUL_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, result))
+
                     this.stringPanelState.setCurrentState(new StringState(result, null), false)
-                     
+
                     console.log("Rule application: Succeeded")
                     this.rulePanelState.activateRule(null, false)
                     changedIndices.forEach((index, i) => { this.stringPanelGraphics.jumpSymbol(index, i * 50) })
                 }
             } else {
-                this.dataStore.addEvent(EventType.INVALID_RULE_APPLICATION, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
-                    
+
+                this.dataStore.addEvent(new EventRuleApply(EventType.INVALID_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined))
+
                 this.stringPanelState.setCurrentState(new StringState(this.stringPanelState.getCurrentState().currentString, null), false)
                 this.rulePanelState.activateRule(null, false)
                 if (ruleIndex !== null) {
@@ -154,12 +166,12 @@ export class TaskTrialStringTransformation {
             if (this.trialState !== TrialState.Completed) {
                 this.targetStringGraphics.jumpSymbols()
             }
-            if(this.trialState !== TrialState.Completed){
+            if (this.trialState !== TrialState.Completed) {
                 this.trialState = TrialState.Completed
-                this.dataStore.addEvent(EventType.GOAL_ACHIEVED, false, new TaskStateData(this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState()))
+                this.dataStore.addEvent(new EventTaskStatus(EventType.GOAL_ACHIEVED))
                 this.onTrialComplete()
             }
-             
+
         }
     }
 

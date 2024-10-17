@@ -43,3 +43,9 @@ export const ICON_SIZE = 150
 
 
 export const OVERLAY_ALPHA = 0.75
+
+
+// Functionality constants
+
+// An upper limit on interaction events per trial, to prevent abuse
+export const MAX_INTERACTIONS_PER_TRIAL = 100
