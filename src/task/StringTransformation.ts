@@ -80,13 +80,14 @@ export class TransformationRule {
             }
         })
         if (!genericsNotOverloaded) {
-            let message = ""
-            genericApplicationHistory.forEach((match, generic) => {
-                if (match.length > 1) {
-                    message += `Generic symbol with ID ${generic.id} cannot be matched to multiple symbols: ${match.map((s) => { return s.id })}\n`
-                }
-            })
-            throw new Error(message);
+            // let message = ""
+            // genericApplicationHistory.forEach((match, generic) => {
+            //     if (match.length > 1) {
+            //         message += `Generic symbol with ID ${generic.id} cannot be matched to multiple symbols: ${match.map((s) => { return s.id })}\n`
+            //     }
+            // })
+            // throw new Error(message);
+            return null
         }
 
 

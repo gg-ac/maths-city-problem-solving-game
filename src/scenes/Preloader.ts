@@ -60,6 +60,9 @@ export class Preloader extends Scene
         this.load.image('bg-area-outline', "ui/panel_outline.png")
         this.load.image('icon-forbidden', "ui/icon_forbidden.png")
         this.load.image('icon-target', "ui/icon_target.png")
+
+        // Study schedule
+        this.load.json("studySchedule", "studies/study_schedule_1.json")
        
     }
 

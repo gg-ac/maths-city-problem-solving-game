@@ -147,7 +147,7 @@ export class RulePanelGraphics {
         this.ruleSubpanelGraphics = []
 
         this.rules.forEach((r, i) => {
-            const subpanel = new RuleSubpanelGraphics(this.scene, this.symbolFactory, this.x + RULE_PANEL_SIDE_MARGIN + RULE_HORIZONTAL_MARGIN, this.y + RULE_VERTICAL_MARGIN + i * this.maxSymbolSize + (i > 0 ? RULE_VERTICAL_MARGIN : 0), clippedWidth - 2 * RULE_HORIZONTAL_MARGIN, this.maxSymbolSize, r, () => this.onPress(i), false, this.overlayCamera)
+            const subpanel = new RuleSubpanelGraphics(this.scene, this.symbolFactory, this.x + RULE_PANEL_SIDE_MARGIN + RULE_HORIZONTAL_MARGIN, this.y + RULE_VERTICAL_MARGIN + i * (this.maxSymbolSize + RULE_VERTICAL_MARGIN), clippedWidth - 2 * RULE_HORIZONTAL_MARGIN, this.maxSymbolSize, r, () => this.onPress(i), false, this.overlayCamera)
             this.ruleSubpanelGraphics.push(subpanel)
         })
     }

@@ -120,7 +120,7 @@ export class TrialDataStore {
     private events: Event[];
     private trialUUID: string;
 
-    constructor() {
+    constructor(private rules: TransformationRule[], private startString: Symbol[], private targetString: Symbol[], private forbiddenStrings: Symbol[][]) {
         this.events = []
         this.startTimestamp = performance.now()
         this.trialUUID = uuidv4()
@@ -136,6 +136,10 @@ export class TrialDataStore {
         return {
             "trialUUID": this.trialUUID,
             "trialStartTimestamp": this.startTimestamp,
+            "startString": this.startString.map((s) => s.id),
+            "targetString": this.targetString.map((s) => s.id),
+            "forbiddenStrings": this.forbiddenStrings.map((string) => { return string.map(s => s.id) }),
+            "rules": this.rules.map(rule => rule.toObject()),
             "events": this.events.map(evt => evt.toObject())
         }
     }
@@ -146,15 +150,15 @@ export class DataStore {
     private trials: TrialDataStore[];
     private sessionUUID: string;
 
-    constructor(public participantUUID: string, private rules: TransformationRule[], private startString: Symbol[], private targetString: Symbol[], private forbiddenStrings: Symbol[][]) {
+    constructor(public participantUUID: string, ) {
         this.trials = []
         this.startTimestamp = Date.now()
         this.sessionUUID = uuidv4()
 
     }
 
-    startNewTrial() {
-        this.trials.push(new TrialDataStore())
+    startNewTrial(rules: TransformationRule[], startString: Symbol[], targetString: Symbol[], forbiddenStrings: Symbol[][]) {
+        this.trials.push(new TrialDataStore(rules, startString, targetString, forbiddenStrings))
     }
 
     getCurrentTrialDataStore() {
@@ -170,10 +174,7 @@ export class DataStore {
             "participantUUID": this.participantUUID,
             "sessionUUID": this.sessionUUID,
             "sessionStartEpochTimestamp": this.startTimestamp,
-            "startString": this.startString.map((s) => s.id),
-            "targetString": this.targetString.map((s) => s.id),
-            "forbiddenStrings": this.forbiddenStrings.map((string) => { return string.map(s => s.id) }),
-            "rules": this.rules.map(rule => rule.toObject()),
+            
             "trials": this.trials.map(trial => trial.toObject())
         }
     }

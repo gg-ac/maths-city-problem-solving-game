@@ -13,6 +13,7 @@ enum TrialState {
     Initialising = "Initialising",
     InProgress = "In Progress",
     Completed = "Completed",
+    Ended = "Ended",
     Paused = "Paused",
     Failed = "Failed"
 }
@@ -30,6 +31,7 @@ export class TaskTrialStringTransformation {
 
     private trialState: TrialState
     actionCounter: number;
+    overlayCamera: OverlayCamera;
 
     constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory, private dataStore: DataStore, private onTrialComplete: () => void) {
 
@@ -38,33 +40,33 @@ export class TaskTrialStringTransformation {
         // A counter for interaction events, used to put a cap on the number of actions
         this.actionCounter = 0
 
-        const overlayCamera = new OverlayCamera(0, 0, this.scene.cameras.main.width, this.scene.cameras.main.height)
-        this.scene.cameras.addExisting(overlayCamera)
-        overlayCamera.setScene(this.scene)
+        this.overlayCamera = new OverlayCamera(0, 0, this.scene.cameras.main.width, this.scene.cameras.main.height)
+        this.scene.cameras.addExisting(this.overlayCamera)
+        this.overlayCamera.setScene(this.scene)
 
-        this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.stringPanel, 7, overlayCamera)
+        this.stringPanelGraphics = new StringPanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.stringPanel, 7, this.overlayCamera)
         this.stringPanelState = new StringPanelState(this.startState, (newState, manualChange) => this.onStringPanelStateChange(newState, manualChange))
         this.stringPanelGraphics.setOnSymbolPress((index) => this.onStringPanelSymbolPressed(index))
 
-        this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.rulePanel, 5, this.rules, overlayCamera)
+        this.rulePanelGraphics = new RulePanelGraphics(this.scene, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.rulePanel, 5, this.rules, this.overlayCamera)
         this.rulePanelState = new RulePanelState((index, manualChange) => this.onActiveRuleChange(index, manualChange))
         this.rulePanelGraphics.setOnRulePress((index) => this.onRulePanelRulePressed(index))
 
-        this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, overlayCamera)
+        this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, this.overlayCamera)
         this.targetStringGraphics.positionBelow(this.stringPanelGraphics.background)
 
         this.forbiddenStringGraphics = []
         const forbiddenStringRowHeight = PANEL_SECTION_HEIGHTS.forbiddenStringPanel / this.forbiddenStrings.length
         this.forbiddenStrings.forEach((string, index) => {
-            const newForbiddenStringGraphics = new ForbiddenStringGraphics(this.scene, string, this.symbolFactory, 0, forbiddenStringRowHeight * index, GAME_WIDTH, forbiddenStringRowHeight, overlayCamera)
+            const newForbiddenStringGraphics = new ForbiddenStringGraphics(this.scene, string, this.symbolFactory, 0, forbiddenStringRowHeight * index, GAME_WIDTH, forbiddenStringRowHeight, this.overlayCamera)
             this.forbiddenStringGraphics.push(newForbiddenStringGraphics)
             newForbiddenStringGraphics.positionBelow(this.stringPanelGraphics.background)
         })
 
-        overlayCamera.updateOverlay()
+        this.overlayCamera.updateOverlay()
 
         this.trialState = TrialState.InProgress
-        this.dataStore.startNewTrial()
+        this.dataStore.startNewTrial(this.rules, this.startState.currentString, this.targetString, this.forbiddenStrings)
         this.dataStore.addEvent(new EventTaskStatus(EventType.START_TRIAL))
 
     }
@@ -167,11 +169,26 @@ export class TaskTrialStringTransformation {
                 this.targetStringGraphics.jumpSymbols()
             }
             if (this.trialState !== TrialState.Completed) {
-                this.trialState = TrialState.Completed
                 this.dataStore.addEvent(new EventTaskStatus(EventType.GOAL_ACHIEVED))
-                this.onTrialComplete()
+                this.completeTrial()
+                this.endTrial()
             }
 
+        }
+    }
+
+    public completeTrial(){
+        if (this.trialState !== TrialState.Completed) {
+            this.trialState = TrialState.Completed
+            this.onTrialComplete()
+        }
+    }
+
+    public endTrial() {
+        if (this.trialState !== TrialState.Ended) {
+            this.trialState = TrialState.Ended
+            this.dataStore.addEvent(new EventTaskStatus(EventType.END_TRIAL))
+            this.scene.cameras.remove(this.overlayCamera)            
         }
     }
 
