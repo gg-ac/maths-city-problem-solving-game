@@ -6,7 +6,8 @@ import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
 import { OverlayCamera } from "./OverlayCamera";
-import { DataStore, EventRuleApply, EventSelect, EventTaskStatus, EventType } from "./DataStorage";
+import { DataStore, EventRuleApply, EventSelect, EventTaskReset, EventTaskStatus, EventType } from "./DataStorage";
+import { UIPanelGraphics } from "./UIPanel";
 
 
 enum TrialState {
@@ -32,6 +33,7 @@ export class TaskTrialStringTransformation {
     private trialState: TrialState
     actionCounter: number;
     overlayCamera: OverlayCamera;
+    uiPanelGraphics: UIPanelGraphics;
 
     constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory, private dataStore: DataStore, private onTrialComplete: () => void) {
 
@@ -54,6 +56,8 @@ export class TaskTrialStringTransformation {
 
         this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, this.overlayCamera)
         this.targetStringGraphics.positionBelow(this.stringPanelGraphics.background)
+
+        this.uiPanelGraphics = new UIPanelGraphics(this.scene, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel + PANEL_SECTION_HEIGHTS.rulePanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.uiPanel, () => this.resetTrial(), this.overlayCamera)
 
         this.forbiddenStringGraphics = []
         const forbiddenStringRowHeight = PANEL_SECTION_HEIGHTS.forbiddenStringPanel / this.forbiddenStrings.length
@@ -107,6 +111,15 @@ export class TaskTrialStringTransformation {
                 this.actionCounter++
                 this.tryApplyCurrentRule()
             }
+        }
+    }
+
+    private resetTrial() {
+        if (this.trialState == TrialState.InProgress) {
+            this.dataStore.addEvent(new EventTaskReset(EventType.TRIAL_RESET, this.startState.currentString))
+            this.stringPanelState.setCurrentState(new StringState(this.startState.currentString, null), false)
+            this.rulePanelState.activateRule(null, false)
+            this.stringPanelState.getCurrentState().currentString.forEach((_, i) => { this.stringPanelGraphics.jumpSymbol(i, i * 10) })
         }
     }
 
@@ -177,7 +190,7 @@ export class TaskTrialStringTransformation {
         }
     }
 
-    public completeTrial(){
+    public completeTrial() {
         if (this.trialState !== TrialState.Completed) {
             this.trialState = TrialState.Completed
             this.onTrialComplete()
@@ -188,7 +201,7 @@ export class TaskTrialStringTransformation {
         if (this.trialState !== TrialState.Ended) {
             this.trialState = TrialState.Ended
             this.dataStore.addEvent(new EventTaskStatus(EventType.END_TRIAL))
-            this.scene.cameras.remove(this.overlayCamera)            
+            this.scene.cameras.remove(this.overlayCamera)
         }
     }
 

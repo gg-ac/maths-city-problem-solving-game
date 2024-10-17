@@ -4,11 +4,17 @@ export const GAME_HEIGHT = 1920
 export const MAX_SYMBOL_SIZE = 125
 
 export const PANEL_SECTION_HEIGHTS = {
-    "forbiddenStringPanel": GAME_HEIGHT/8,
-    "stringPanel": 2*GAME_HEIGHT/8,
-    "targetStringPanel":  GAME_HEIGHT/8,
-    "rulePanel": 4*GAME_HEIGHT/8,
+    "forbiddenStringPanel": GAME_HEIGHT/9,
+    "stringPanel": 2*GAME_HEIGHT/9,
+    "targetStringPanel":  GAME_HEIGHT/9,
+    "rulePanel": 4*GAME_HEIGHT/9,
+    "uiPanel": GAME_HEIGHT/9,
 }
+
+
+
+export const UI_PANEL_SIDE_MARGIN = 20
+export const UI_PANEL_SIDE_PAD = 10
 
 
 export const RULE_PANEL_SIDE_MARGIN = 20

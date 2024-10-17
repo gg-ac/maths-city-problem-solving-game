@@ -10,6 +10,8 @@ export enum EventType {
     INVALID_RULE_APPLICATION = "rule:apply:invalid",
     FORBIDDEN_RULE_APPLICATION = "rule:apply:forbidden",
 
+    TRIAL_RESET = "trial:reset",
+
     GOAL_ACHIEVED = "goal:achieved",
     START_TRIAL = "trial:start",
     END_TRIAL = "trial:end"
@@ -19,7 +21,7 @@ abstract class Event {
     constructor(protected type: EventType, protected timestamp?: number) { }
     abstract toObject(): Object
 
-    setTimestamp(timestamp:number){
+    setTimestamp(timestamp: number) {
         this.timestamp = timestamp
     }
 }
@@ -34,29 +36,46 @@ export class EventTaskStatus extends Event {
     }
 }
 
-export class EventRuleApply extends Event {
+export class EventTaskReset extends Event {
 
-    constructor(type: EventType.SUCCESSFUL_RULE_APPLICATION | EventType.INVALID_RULE_APPLICATION | EventType.FORBIDDEN_RULE_APPLICATION, private ruleIndex: integer | null, private symbolIndex: integer | null, private startString: Symbol[], private resultString?: Symbol[], timestamp?: number, private forbiddenStringMatchIndex?:integer) {
+    constructor(type: EventType.TRIAL_RESET, private startString: Symbol[], timestamp?: number) {
         super(type, timestamp)
     }
 
     toObject(): Object {
-        if(this.type === EventType.FORBIDDEN_RULE_APPLICATION){            
+        return {
+            "eventType": this.type.valueOf(),
+            "timestamp": this.timestamp,
+            "startString": this.startString?.map(s => s.id),
+        }
+
+    }
+}
+
+
+export class EventRuleApply extends Event {
+
+    constructor(type: EventType.SUCCESSFUL_RULE_APPLICATION | EventType.INVALID_RULE_APPLICATION | EventType.FORBIDDEN_RULE_APPLICATION, private ruleIndex: integer | null, private symbolIndex: integer | null, private startString: Symbol[], private resultString?: Symbol[], timestamp?: number, private forbiddenStringMatchIndex?: integer) {
+        super(type, timestamp)
+    }
+
+    toObject(): Object {
+        if (this.type === EventType.FORBIDDEN_RULE_APPLICATION) {
             return {
                 "eventType": this.type.valueOf(),
                 "timestamp": this.timestamp,
                 "ruleIndex": this.ruleIndex,
                 "symbolIndex": this.symbolIndex,
-                "startString": this.startString?.map(s=>s.id),
+                "startString": this.startString?.map(s => s.id),
                 "forbiddenStringMatchIndex": this.forbiddenStringMatchIndex
             }
-        }else if(this.type === EventType.INVALID_RULE_APPLICATION){
+        } else if (this.type === EventType.INVALID_RULE_APPLICATION) {
             return {
                 "eventType": this.type.valueOf(),
                 "timestamp": this.timestamp,
                 "ruleIndex": this.ruleIndex,
                 "symbolIndex": this.symbolIndex,
-                "startString": this.startString?.map(s=>s.id)
+                "startString": this.startString?.map(s => s.id)
             }
         }
         return {
@@ -64,8 +83,8 @@ export class EventRuleApply extends Event {
             "timestamp": this.timestamp,
             "ruleIndex": this.ruleIndex,
             "symbolIndex": this.symbolIndex,
-            "startString": this.startString?.map(s=>s.id),
-            "resultString": this.resultString?.map(s=>s.id)
+            "startString": this.startString?.map(s => s.id),
+            "resultString": this.resultString?.map(s => s.id)
         }
     }
 }
@@ -88,7 +107,7 @@ export class EventSelect extends Event {
             return {
                 "eventType": this.type.valueOf(),
                 "timestamp": this.timestamp,
-                "currentString": this.currentString?.map(s=>s.id),
+                "currentString": this.currentString?.map(s => s.id),
                 "symbolIndex": this.selectedIndex,
                 "manual": this.manual
             }
@@ -126,7 +145,7 @@ export class TrialDataStore {
         this.trialUUID = uuidv4()
     }
 
-    addEvent(event:Event) {
+    addEvent(event: Event) {
         event.setTimestamp(performance.now())
         this.events.push(event)
         console.log(event.toObject())
@@ -150,7 +169,7 @@ export class DataStore {
     private trials: TrialDataStore[];
     private sessionUUID: string;
 
-    constructor(public participantUUID: string, ) {
+    constructor(public participantUUID: string,) {
         this.trials = []
         this.startTimestamp = Date.now()
         this.sessionUUID = uuidv4()
@@ -165,7 +184,7 @@ export class DataStore {
         return this.trials[this.trials.length - 1]
     }
 
-    addEvent(event:Event) {
+    addEvent(event: Event) {
         this.getCurrentTrialDataStore().addEvent(event)
     }
 
@@ -174,7 +193,7 @@ export class DataStore {
             "participantUUID": this.participantUUID,
             "sessionUUID": this.sessionUUID,
             "sessionStartEpochTimestamp": this.startTimestamp,
-            
+
             "trials": this.trials.map(trial => trial.toObject())
         }
     }
