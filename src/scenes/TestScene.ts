@@ -7,6 +7,10 @@ import { StringState } from '../task/StringPanel';
 import { GazeAperture } from '../task/GazeAperture';
 import { DataStore } from '../task/DataStorage';
 import { StudySchedule } from '../constants/studySchedule';
+import { getFirestore } from 'firebase/firestore';
+import { getAuth } from 'firebase/auth';
+import { authorisedUser } from '../main';
+
 
 export class TestScene extends BaseScene {
     background: GameObjects.Image;
@@ -24,7 +28,8 @@ export class TestScene extends BaseScene {
     }
 
     create() {
-        this.dataStore = new DataStore("test_participant")
+
+        this.dataStore = new DataStore(authorisedUser.user.uid)
 
         this.studySchedule = this.cache.json.get('studySchedule') as StudySchedule;
         this.symbolFactory = new SymbolFactory()

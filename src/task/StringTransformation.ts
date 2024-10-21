@@ -1,3 +1,11 @@
+function mapArrayToIndexedObject<T>(array: T[]): { [key: number]: T } {
+    return array.reduce((acc, curr, index) => {
+        acc[index] = curr;
+        return acc;
+    }, {} as { [key: number]: T });
+}
+
+
 export class Symbol {
     // Define the properties and methods of the Symbol class as needed
     constructor(public id: string, public isGeneric: boolean = false) { }
@@ -40,8 +48,8 @@ export class TransformationRule {
 
     toObject(){
         return {
-            "input":this.input.map((i) => i.toObject()),            
-            "output":this.output.map((i) => i.toObject())
+            "input":mapArrayToIndexedObject(this.input.map((i) => i.toObject())),            
+            "output":mapArrayToIndexedObject(this.output.map((i) => i.toObject()))
         }
     }
 

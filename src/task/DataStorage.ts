@@ -1,8 +1,10 @@
 import { StringState } from "./StringPanel";
 import { v4 as uuidv4 } from 'uuid';
 import { Symbol, TransformationRule } from "./StringTransformation";
+import { addDoc, arrayUnion, collection, CollectionReference, doc, Firestore, getFirestore, setDoc, updateDoc, writeBatch } from "firebase/firestore";
+import { mapArrayToIndexedObject } from "../utils/Utilities";
 
-export enum EventType {
+export enum RewritingTaskEventType {
     SELECT_RULE = "rule:select",
     SELECT_SYMBOL = "symbol:select",
 
@@ -17,8 +19,13 @@ export enum EventType {
     END_TRIAL = "trial:end"
 }
 
+export enum NBackTaskEventType {
+    START_TRIAL = "trial:start",
+    END_TRIAL = "trial:end"
+}
+
 abstract class Event {
-    constructor(protected type: EventType, protected timestamp?: number) { }
+    constructor(protected type: RewritingTaskEventType | NBackTaskEventType, protected timestamp?: number) { }
     abstract toObject(): Object
 
     setTimestamp(timestamp: number) {
@@ -30,86 +37,85 @@ abstract class Event {
 export class EventTaskStatus extends Event {
     toObject(): Object {
         return {
-            "eventType": this.type.valueOf(),
-            "timestamp": this.timestamp
+            eventType: this.type.valueOf(),
+            timestamp: this.timestamp
         }
     }
 }
 
-export class EventTaskReset extends Event {
+export class EventRewritingTaskReset extends Event {
 
-    constructor(type: EventType.TRIAL_RESET, private startString: Symbol[], timestamp?: number) {
+    constructor(type: RewritingTaskEventType.TRIAL_RESET, private startString: Symbol[], timestamp?: number) {
         super(type, timestamp)
     }
 
     toObject(): Object {
         return {
-            "eventType": this.type.valueOf(),
-            "timestamp": this.timestamp,
-            "startString": this.startString?.map(s => s.id),
+            eventType: this.type.valueOf(),
+            timestamp: this.timestamp,
+            startString: mapArrayToIndexedObject(this.startString?.map(s => s.id)),
         }
-
     }
 }
 
 
-export class EventRuleApply extends Event {
+export class EventRewritingTaskRuleApply extends Event {
 
-    constructor(type: EventType.SUCCESSFUL_RULE_APPLICATION | EventType.INVALID_RULE_APPLICATION | EventType.FORBIDDEN_RULE_APPLICATION, private ruleIndex: integer | null, private symbolIndex: integer | null, private startString: Symbol[], private resultString?: Symbol[], timestamp?: number, private forbiddenStringMatchIndex?: integer) {
+    constructor(type: RewritingTaskEventType.SUCCESSFUL_RULE_APPLICATION | RewritingTaskEventType.INVALID_RULE_APPLICATION | RewritingTaskEventType.FORBIDDEN_RULE_APPLICATION, private ruleIndex: integer | null, private symbolIndex: integer | null, private startString: Symbol[], private resultString?: Symbol[], timestamp?: number, private forbiddenStringMatchIndex?: integer) {
         super(type, timestamp)
     }
 
     toObject(): Object {
-        if (this.type === EventType.FORBIDDEN_RULE_APPLICATION) {
+        if (this.type === RewritingTaskEventType.FORBIDDEN_RULE_APPLICATION) {
             return {
-                "eventType": this.type.valueOf(),
-                "timestamp": this.timestamp,
-                "ruleIndex": this.ruleIndex,
-                "symbolIndex": this.symbolIndex,
-                "startString": this.startString?.map(s => s.id),
-                "forbiddenStringMatchIndex": this.forbiddenStringMatchIndex
+                eventType: this.type.valueOf(),
+                timestamp: this.timestamp,
+                ruleIndex: this.ruleIndex,
+                symbolIndex: this.symbolIndex,
+                startString: mapArrayToIndexedObject(this.startString?.map(s => s.id)),
+                forbiddenStringMatchIndex: this.forbiddenStringMatchIndex
             }
-        } else if (this.type === EventType.INVALID_RULE_APPLICATION) {
+        } else if (this.type === RewritingTaskEventType.INVALID_RULE_APPLICATION) {
             return {
-                "eventType": this.type.valueOf(),
-                "timestamp": this.timestamp,
-                "ruleIndex": this.ruleIndex,
-                "symbolIndex": this.symbolIndex,
-                "startString": this.startString?.map(s => s.id)
+                eventType: this.type.valueOf(),
+                timestamp: this.timestamp,
+                ruleIndex: this.ruleIndex,
+                symbolIndex: this.symbolIndex,
+                startString: mapArrayToIndexedObject(this.startString?.map(s => s.id))
             }
         }
         return {
-            "eventType": this.type.valueOf(),
-            "timestamp": this.timestamp,
-            "ruleIndex": this.ruleIndex,
-            "symbolIndex": this.symbolIndex,
-            "startString": this.startString?.map(s => s.id),
-            "resultString": this.resultString?.map(s => s.id)
+            eventType: this.type.valueOf(),
+            timestamp: this.timestamp,
+            ruleIndex: this.ruleIndex,
+            symbolIndex: this.symbolIndex,
+            startString: mapArrayToIndexedObject(this.startString?.map(s => s.id)),
+            resultString: mapArrayToIndexedObject(this.resultString!.map(s => s.id))
         }
     }
 }
 
-export class EventSelect extends Event {
+export class EventRewritingTaskSelect extends Event {
 
-    constructor(type: EventType.SELECT_RULE | EventType.SELECT_SYMBOL, private selectedIndex: integer | null, private manual: boolean, private currentString?: Symbol[], timestamp?: number) {
+    constructor(type: RewritingTaskEventType.SELECT_RULE | RewritingTaskEventType.SELECT_SYMBOL, private selectedIndex: integer | null, private manual: boolean, private currentString?: Symbol[], timestamp?: number) {
         super(type, timestamp)
     }
 
     toObject(): Object {
-        if (this.type === EventType.SELECT_RULE) {
+        if (this.type === RewritingTaskEventType.SELECT_RULE) {
             return {
-                "eventType": this.type.valueOf(),
-                "timestamp": this.timestamp,
-                "ruleIndex": this.selectedIndex,
-                "manual": this.manual
+                eventType: this.type.valueOf(),
+                timestamp: this.timestamp,
+                ruleIndex: this.selectedIndex,
+                manual: this.manual
             }
-        } else if (this.type === EventType.SELECT_SYMBOL) {
+        } else if (this.type === RewritingTaskEventType.SELECT_SYMBOL) {
             return {
-                "eventType": this.type.valueOf(),
-                "timestamp": this.timestamp,
-                "currentString": this.currentString?.map(s => s.id),
-                "symbolIndex": this.selectedIndex,
-                "manual": this.manual
+                eventType: this.type.valueOf(),
+                timestamp: this.timestamp,
+                currentString: mapArrayToIndexedObject(this.currentString!.map(s => s.id)),
+                symbolIndex: this.selectedIndex,
+                manual: this.manual
             }
         }
         return {}
@@ -134,7 +140,7 @@ export class EventSelect extends Event {
 
 // }
 
-export class TrialDataStore {
+export class RewritingTaskTrialDataStore {
     private startTimestamp: number;
     private events: Event[];
     private trialUUID: string;
@@ -153,48 +159,90 @@ export class TrialDataStore {
 
     toObject() {
         return {
-            "trialUUID": this.trialUUID,
-            "trialStartTimestamp": this.startTimestamp,
-            "startString": this.startString.map((s) => s.id),
-            "targetString": this.targetString.map((s) => s.id),
-            "forbiddenStrings": this.forbiddenStrings.map((string) => { return string.map(s => s.id) }),
-            "rules": this.rules.map(rule => rule.toObject()),
-            "events": this.events.map(evt => evt.toObject())
+            trialUUID: this.trialUUID,
+            trialStartTimestamp: this.startTimestamp,
+            startString: this.startString.map((s) => s.id),
+            targetString: this.targetString.map((s) => s.id),
+            forbiddenStrings: mapArrayToIndexedObject(this.forbiddenStrings.map((string) => { return mapArrayToIndexedObject(string.map(s => s.id)) })),
+            rules: mapArrayToIndexedObject(this.rules.map(rule => rule.toObject())),
+            events: mapArrayToIndexedObject(this.events.map(evt => evt.toObject()))
         }
+    }
+
+    documentObject() {
+        return {
+            trialUUID: this.trialUUID,
+            trialStartTimestamp: this.startTimestamp,
+            startString: this.startString.map((s) => s.id),
+            targetString: this.targetString.map((s) => s.id),
+            forbiddenStrings: mapArrayToIndexedObject(this.forbiddenStrings.map((string) => { return mapArrayToIndexedObject(string.map(s => s.id)) })),
+            rules: mapArrayToIndexedObject(this.rules.map(rule => rule.toObject())),
+        }
+    }
+
+    getEvents(){
+        return this.events.map(evt => evt.toObject())
     }
 }
 
 export class DataStore {
     private startTimestamp: number;
-    private trials: TrialDataStore[];
+    private trials: RewritingTaskTrialDataStore[];
     private sessionUUID: string;
+    private participantDataRef;
+    private participantRewritingTaskTrialCollectionRef: CollectionReference;
+    private db: Firestore;
 
-    constructor(public participantUUID: string,) {
+    constructor(public participantUUID: string) {
         this.trials = []
         this.startTimestamp = Date.now()
         this.sessionUUID = uuidv4()
 
+        this.db = getFirestore()
+        this.participantDataRef = doc(this.db, "participants", this.participantUUID, "sessions", this.sessionUUID);
+        setDoc(this.participantDataRef, {
+            "startEpochTimestamp":this.startTimestamp
+        })
+
+        this.participantRewritingTaskTrialCollectionRef = collection(this.db, "participants", this.participantUUID, "sessions", this.sessionUUID, "tasks", "rewriting", "trials");
     }
 
-    startNewTrial(rules: TransformationRule[], startString: Symbol[], targetString: Symbol[], forbiddenStrings: Symbol[][]) {
-        this.trials.push(new TrialDataStore(rules, startString, targetString, forbiddenStrings))
+    startNewMainTaskTrial(rules: TransformationRule[], startString: Symbol[], targetString: Symbol[], forbiddenStrings: Symbol[][]) {
+        this.trials.push(new RewritingTaskTrialDataStore(rules, startString, targetString, forbiddenStrings))
     }
 
-    getCurrentTrialDataStore() {
+    getCurrentTrialLocalDataStore() {
         return this.trials[this.trials.length - 1]
     }
 
     addEvent(event: Event) {
-        this.getCurrentTrialDataStore().addEvent(event)
+        this.getCurrentTrialLocalDataStore().addEvent(event)
+    }
+
+    async dbSaveCurrentTrialData(){
+        
+        const currentTrialData = this.getCurrentTrialLocalDataStore()
+        const trialID = `${this.trials.length}`
+
+        // Write the main metadata for the trial to the trial document
+        setDoc(doc(this.participantRewritingTaskTrialCollectionRef, trialID), currentTrialData.documentObject())
+
+        // Create an event subcollection within the trial document, and batch add all event data objects as documents within that subcollection
+        const eventsCollection = collection(this.db, "participants", this.participantUUID, "sessions", this.sessionUUID, "tasks", "rewriting", "trials", trialID, "events");
+        const batch = writeBatch(this.db)
+        currentTrialData.getEvents().forEach((evt, i) => {
+            const eventDoc = doc(eventsCollection, `${i}`)
+            batch.set(eventDoc, evt)
+        })
+        batch.commit()
     }
 
     toObject() {
         return {
-            "participantUUID": this.participantUUID,
-            "sessionUUID": this.sessionUUID,
-            "sessionStartEpochTimestamp": this.startTimestamp,
-
-            "trials": this.trials.map(trial => trial.toObject())
+            participantUUID: this.participantUUID,
+            sessionUUID: this.sessionUUID,
+            sessionStartEpochTimestamp: this.startTimestamp,
+            trials: this.trials.map(trial => trial.toObject())
         }
     }
 }

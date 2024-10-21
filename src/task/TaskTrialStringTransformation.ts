@@ -6,7 +6,7 @@ import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
 import { OverlayCamera } from "./OverlayCamera";
-import { DataStore, EventRuleApply, EventSelect, EventTaskReset, EventTaskStatus, EventType } from "./DataStorage";
+import { DataStore, EventRewritingTaskRuleApply, EventRewritingTaskSelect, EventRewritingTaskReset, EventTaskStatus, RewritingTaskEventType } from "./DataStorage";
 import { UIPanelGraphics } from "./UIPanel";
 
 
@@ -70,8 +70,8 @@ export class TaskTrialStringTransformation {
         this.overlayCamera.updateOverlay()
 
         this.trialState = TrialState.InProgress
-        this.dataStore.startNewTrial(this.rules, this.startState.currentString, this.targetString, this.forbiddenStrings)
-        this.dataStore.addEvent(new EventTaskStatus(EventType.START_TRIAL))
+        this.dataStore.startNewMainTaskTrial(this.rules, this.startState.currentString, this.targetString, this.forbiddenStrings)
+        this.dataStore.addEvent(new EventTaskStatus(RewritingTaskEventType.START_TRIAL))
 
     }
 
@@ -82,7 +82,7 @@ export class TaskTrialStringTransformation {
             this.stringPanelGraphics.setActiveSymbolIndex(newState.currentActiveIndex)
 
             if (this.trialState === TrialState.InProgress) {
-                this.dataStore.addEvent(new EventSelect(EventType.SELECT_SYMBOL, this.stringPanelState?.getCurrentState().currentActiveIndex, manualChange, this.stringPanelState?.getCurrentState().currentString))
+                this.dataStore.addEvent(new EventRewritingTaskSelect(RewritingTaskEventType.SELECT_SYMBOL, this.stringPanelState?.getCurrentState().currentActiveIndex, manualChange, this.stringPanelState?.getCurrentState().currentString))
             }
         }
     }
@@ -100,7 +100,7 @@ export class TaskTrialStringTransformation {
     private onActiveRuleChange(index: integer | null, manualChange: boolean) {
         if (this.trialState == TrialState.InProgress) {
             this.rulePanelGraphics.setActiveSubpanel(index)
-            this.dataStore.addEvent(new EventSelect(EventType.SELECT_RULE, this.rulePanelState?.activeRuleIndex, manualChange))
+            this.dataStore.addEvent(new EventRewritingTaskSelect(RewritingTaskEventType.SELECT_RULE, this.rulePanelState?.activeRuleIndex, manualChange))
         }
     }
 
@@ -116,7 +116,7 @@ export class TaskTrialStringTransformation {
 
     private resetTrial() {
         if (this.trialState == TrialState.InProgress) {
-            this.dataStore.addEvent(new EventTaskReset(EventType.TRIAL_RESET, this.startState.currentString))
+            this.dataStore.addEvent(new EventRewritingTaskReset(RewritingTaskEventType.TRIAL_RESET, this.startState.currentString))
             this.stringPanelState.setCurrentState(new StringState(this.startState.currentString, null), false)
             this.rulePanelState.activateRule(null, false)
             this.stringPanelState.getCurrentState().currentString.forEach((_, i) => { this.stringPanelGraphics.jumpSymbol(i, i * 10) })
@@ -143,7 +143,7 @@ export class TaskTrialStringTransformation {
                 const forbiddenStringMatchIndex = this.isStringForbidden(result)
                 if (forbiddenStringMatchIndex !== -1) {
 
-                    this.dataStore.addEvent(new EventRuleApply(EventType.FORBIDDEN_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined, undefined, forbiddenStringMatchIndex))
+                    this.dataStore.addEvent(new EventRewritingTaskRuleApply(RewritingTaskEventType.FORBIDDEN_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined, undefined, forbiddenStringMatchIndex))
 
                     // If the resulting state would be a forbidden state, don't update current state
                     console.log(`Cannot apply rule: resulting state would be forbidden state ${forbiddenStringMatchIndex}`)
@@ -155,7 +155,7 @@ export class TaskTrialStringTransformation {
                     }
                 } else {
                     // Otherwise, update the current state                           
-                    this.dataStore.addEvent(new EventRuleApply(EventType.SUCCESSFUL_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, result))
+                    this.dataStore.addEvent(new EventRewritingTaskRuleApply(RewritingTaskEventType.SUCCESSFUL_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, result))
 
                     this.stringPanelState.setCurrentState(new StringState(result, null), false)
 
@@ -165,7 +165,7 @@ export class TaskTrialStringTransformation {
                 }
             } else {
 
-                this.dataStore.addEvent(new EventRuleApply(EventType.INVALID_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined))
+                this.dataStore.addEvent(new EventRewritingTaskRuleApply(RewritingTaskEventType.INVALID_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, undefined))
 
                 this.stringPanelState.setCurrentState(new StringState(this.stringPanelState.getCurrentState().currentString, null), false)
                 this.rulePanelState.activateRule(null, false)
@@ -182,7 +182,7 @@ export class TaskTrialStringTransformation {
                 this.targetStringGraphics.jumpSymbols()
             }
             if (this.trialState !== TrialState.Completed) {
-                this.dataStore.addEvent(new EventTaskStatus(EventType.GOAL_ACHIEVED))
+                this.dataStore.addEvent(new EventTaskStatus(RewritingTaskEventType.GOAL_ACHIEVED))
                 this.completeTrial()
                 this.endTrial()
             }
@@ -200,7 +200,8 @@ export class TaskTrialStringTransformation {
     public endTrial() {
         if (this.trialState !== TrialState.Ended) {
             this.trialState = TrialState.Ended
-            this.dataStore.addEvent(new EventTaskStatus(EventType.END_TRIAL))
+            this.dataStore.addEvent(new EventTaskStatus(RewritingTaskEventType.END_TRIAL))
+            this.dataStore.dbSaveCurrentTrialData()
             this.scene.cameras.remove(this.overlayCamera)
         }
     }
