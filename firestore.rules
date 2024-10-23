@@ -1,9 +1,32 @@
 rules_version = '2'
 service cloud.firestore {
-
   match /databases/{database}/documents {
-    match /participants/{participantID} {
-      allow read, write: if request.auth.uid == participantID;
+    match /participants/{participantId} {
+      // Allow read, create, update, and delete access to the participant's own document
+      allow read, create, update: if request.auth != null && request.auth.uid == participantId;
+
+      match /sessions/{sessionId} {
+        // Allow read, create, update, and delete access to the participant's sessions
+        allow read, create, update: if request.auth != null && request.auth.uid == participantId;
+
+        match /tasks/rewriting {
+          // Allow read, create, update, and delete access to the participant's tasks
+          allow read, create, update: if request.auth != null && request.auth.uid == participantId;
+
+            match /trials/{trialId} {
+              // Allow read access to the trials subcollection
+              allow read, create, update: if request.auth != null && request.auth.uid == participantId;
+
+              match /events/{eventId} {
+                // Allow read access to the events subcollection
+                allow read: if request.auth != null && request.auth.uid == participantId;
+
+                // Allow create access to add a new event document
+                allow create: if request.auth != null && request.auth.uid == participantId;
+              }
+            }
+        }
+      }
     }
   }
 }
