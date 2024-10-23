@@ -11,6 +11,7 @@ export enum RewritingTaskEventType {
     SUCCESSFUL_RULE_APPLICATION = "rule:apply:success",
     INVALID_RULE_APPLICATION = "rule:apply:invalid",
     FORBIDDEN_RULE_APPLICATION = "rule:apply:forbidden",
+    UNDO_RULE_APPLICATION = "rule:apply:undo",
 
     TRIAL_RESET = "trial:reset",
 
@@ -54,6 +55,22 @@ export class EventRewritingTaskReset extends Event {
             eventType: this.type.valueOf(),
             timestamp: this.timestamp,
             startString: mapArrayToIndexedObject(this.startString?.map(s => s.id)),
+        }
+    }
+}
+
+export class EventRewritingTaskUndo extends Event {
+
+    constructor(type: RewritingTaskEventType.UNDO_RULE_APPLICATION, private startString: Symbol[], private resultString: Symbol[], timestamp?: number) {
+        super(type, timestamp)
+    }
+
+    toObject(): Object {
+        return {
+            eventType: this.type.valueOf(),
+            timestamp: this.timestamp,
+            startString: mapArrayToIndexedObject(this.startString.map(s => s.id)),
+            resultString: mapArrayToIndexedObject(this.resultString.map(s => s.id)),
         }
     }
 }

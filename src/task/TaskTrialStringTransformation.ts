@@ -6,7 +6,7 @@ import { TransformationRule, Symbol } from "./StringTransformation";
 import { TargetStringGraphics } from "./TargetStringGraphics";
 import { ForbiddenStringGraphics } from "./ForbiddenStringGraphics";
 import { OverlayCamera } from "./OverlayCamera";
-import { DataStore, EventRewritingTaskRuleApply, EventRewritingTaskSelect, EventRewritingTaskReset, EventTaskStatus, RewritingTaskEventType } from "./DataStorage";
+import { DataStore, EventRewritingTaskRuleApply, EventRewritingTaskSelect, EventRewritingTaskReset, EventTaskStatus, RewritingTaskEventType, EventRewritingTaskUndo } from "./DataStorage";
 import { UIPanelGraphics } from "./UIPanel";
 
 
@@ -35,7 +35,12 @@ export class TaskTrialStringTransformation {
     overlayCamera: OverlayCamera;
     uiPanelGraphics: UIPanelGraphics;
 
+    private undoStateHistory: Symbol[][]
+
     constructor(private scene: Phaser.Scene, private rules: TransformationRule[], private startState: StringState, private targetString: Symbol[], private forbiddenStrings: Symbol[][], private symbolFactory: SymbolFactory, private dataStore: DataStore, private onTrialComplete: () => void) {
+
+        // List for storing past states which can be revisited using undo functionality
+        this.undoStateHistory = []
 
         this.trialState = TrialState.Initialising
 
@@ -57,7 +62,7 @@ export class TaskTrialStringTransformation {
         this.targetStringGraphics = new TargetStringGraphics(this.scene, this.targetString, this.symbolFactory, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.targetStringPanel, this.overlayCamera)
         this.targetStringGraphics.positionBelow(this.stringPanelGraphics.background)
 
-        this.uiPanelGraphics = new UIPanelGraphics(this.scene, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel + PANEL_SECTION_HEIGHTS.rulePanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.uiPanel, () => this.resetTrial(), this.overlayCamera)
+        this.uiPanelGraphics = new UIPanelGraphics(this.scene, 0, PANEL_SECTION_HEIGHTS.forbiddenStringPanel + PANEL_SECTION_HEIGHTS.stringPanel + PANEL_SECTION_HEIGHTS.targetStringPanel + PANEL_SECTION_HEIGHTS.rulePanel, GAME_WIDTH, PANEL_SECTION_HEIGHTS.uiPanel, () => this.undoRuleApplication(), this.overlayCamera)
 
         this.forbiddenStringGraphics = []
         const forbiddenStringRowHeight = PANEL_SECTION_HEIGHTS.forbiddenStringPanel / this.forbiddenStrings.length
@@ -123,6 +128,21 @@ export class TaskTrialStringTransformation {
         }
     }
 
+    private undoRuleApplication(){
+        if (this.trialState == TrialState.InProgress) {
+            if(this.undoStateHistory.length > 0){
+                const previousString = this.undoStateHistory.pop()
+                this.dataStore.addEvent(new EventRewritingTaskUndo(RewritingTaskEventType.UNDO_RULE_APPLICATION, this.stringPanelState.getCurrentState().currentString, previousString!))
+                this.stringPanelState.setCurrentState(new StringState(previousString!, null), false)
+                this.rulePanelState.activateRule(null, false)
+            }
+        }
+    }
+
+    private storeUndoStateHistory(currentString:Symbol[]){
+        this.undoStateHistory.push(currentString)
+    }
+
     private tryApplyCurrentRule() {
         const targetIndex = this.stringPanelState.getCurrentState().currentActiveIndex
         const ruleIndex = this.rulePanelState.activeRuleIndex
@@ -157,8 +177,13 @@ export class TaskTrialStringTransformation {
                     // Otherwise, update the current state                           
                     this.dataStore.addEvent(new EventRewritingTaskRuleApply(RewritingTaskEventType.SUCCESSFUL_RULE_APPLICATION, this.rulePanelState?.activeRuleIndex, this.stringPanelState?.getCurrentState().currentActiveIndex, startString, result))
 
+                    // Add the current state string to the undo history list
+                    this.storeUndoStateHistory(this.stringPanelState.getCurrentState().currentString)
+
+                    // Update the current string state
                     this.stringPanelState.setCurrentState(new StringState(result, null), false)
 
+                    // Update the UI graphics
                     console.log("Rule application: Succeeded")
                     this.rulePanelState.activateRule(null, false)
                     changedIndices.forEach((index, i) => { this.stringPanelGraphics.jumpSymbol(index, i * 50) })
