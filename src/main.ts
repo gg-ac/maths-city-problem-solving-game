@@ -28,7 +28,6 @@ function setupGame() {
     let sessionIDfromURL = "0"
     document.getElementById("new-game-button")!.style.display = "block";
 
-
     try {
         loadStudySchedule(studyIDfromURL, studyConditionIDfromURL!, sessionIDfromURL, false).then((scheduleData) => {
 
