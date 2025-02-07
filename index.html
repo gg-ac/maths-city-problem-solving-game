@@ -3,18 +3,25 @@
 
 <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/png" href="/favicon.png" />
+    <link rel="icon" type="image/png" href="./favicon.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="/style.css">
-    <title>Leverhulme Task Prototype</title>
+    <link rel="stylesheet" href="./style.css">
+    <title>Problem Solving Study - University of Leeds</title>
 
     <style>
+        @font-face {
+            font-family: 'Segment7';
+            src: url('assets/fonts/Segment7Standard.woff2') format('woff2'),
+                url('assets/fonts/Segment7Standard.woff') format('woff');
+            font-weight: normal;
+            font-style: italic;
+            font-display: swap;
+        }
+
         body {
             margin: 0;
             overflow: hidden;
-            background-image: url('assets/bg.png');
-            background-repeat: repeat;
-            background-size: auto;
+            background-color: #151515;
         }
 
         #game {
@@ -118,11 +125,125 @@
                 opacity: 0;
             }
         }
+
+        .modal {
+            display: none;
+            /* Hidden by default */
+            position: fixed;
+            /* Stay in place */
+            z-index: 1;
+            /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            /* Full width */
+            height: 100%;
+            /* Full height */
+            overflow: auto;
+            background-color: rgb(14, 14, 14);
+        }
+
+        .modal-content {
+
+            margin: auto;
+            /* padding: 20px; */
+            /* border: 1px solid #888; */
+            height: 100%;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+
+
+
+
+        .swal-overlay {
+            background-color: rgba(0, 0, 0, 0.75);
+        }
+
+        .swal-overlay--show-modal .swal-modal {
+            animation:none
+        }
+
+        .swal-modal {
+            background-color: #262626;
+            border-radius: 0px;
+            font-family: 'Courier New', Courier, monospace;
+            color: white;
+        }
+
+        .swal-text {
+            font-family: 'Courier New', Courier, monospace;
+            color: white
+        }
+
+        .swal-content__input {
+            background-color: #3c3c3c;
+            font-family: 'Courier New', Courier, monospace;
+            color: white
+        }
+
+        .swal-button {
+            padding: 10px 20px;
+            border-radius: 0px;
+            background-color: #3c3c3c;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #3e549a;
+            color: white
+        }
+
+        .swal-button--confirm {
+            padding: 10px 20px;
+            border-radius: 0px;
+            background-color: #3c3c3c;
+            font-family: 'Courier New', Courier, monospace;
+            border: 1px solid #3e549a;
+            color: white
+        }
+        .new-game-button {
+            position: fixed;
+            z-index: 1;
+            bottom: 20px;
+            right: 20px;
+            background-color: #5f1fdf; /* Blue color */
+            color: white;
+            border: 2px solid #f5f5f5; /* Border color */
+            border-radius: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+            transition: background-color 0.3s;
+        }
+        .new-game-button:hover {
+            background-color: hsl(264, 63%, 33%); /* Darker blue on hover */            
+        }
     </style>
+  <script type="module" crossorigin src="./assets/index-Cu_PUndw.js"></script>
+  <link rel="modulepreload" crossorigin href="./assets/phaser-FTA8Ma6K.js">
+  <link rel="stylesheet" crossorigin href="./assets/index-BjVAUCAy.css">
 </head>
 
 <body>
     <button id="saveButton" style="display:none"></button>
+    <div id="surveyModal" class="modal">
+        <div class="modal-content">
+            <!-- <span class="close" id="surveyCloseButton">&times;</span> -->
+            <div id="surveyContainer"></div>
+        </div>
+    </div>
     <div class="overlay" id="overlay" style="display: none;">
         <svg class="phone" viewBox="0 -10 64 148">
             <!-- Outer phone outline -->
@@ -145,7 +266,13 @@
     <div id="app">
         <div id="game-container"></div>
     </div>
-    <script type="module" src="/src/main.ts"></script>
+
+    <button class="new-game-button" id="new-game-button" style="display:none" onclick="refreshPage()">New Game</button>
+    <script>
+        function refreshPage() {
+            location.reload();
+        }
+    </script>
 </body>
 
 </html>
