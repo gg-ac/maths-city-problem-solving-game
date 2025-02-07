@@ -11,14 +11,23 @@ export interface ScheduleRule {
 }
 
 export interface ScheduleTrial {
-    postTrialRest: number;
-    rules: ScheduleRule[];
-    startString: string[];
-    targetString: string[];
-    forbiddenStrings: string[][];
+    isPractice: boolean
+    instructionsKey: string | undefined
+    trialDurationSeconds: number
+    postTrialRest: number
+    rules: ScheduleRule[]
+    startString: string[]
+    targetString: string[]
+    forbiddenStrings: string[][]
+    forbiddenIsPrefix: boolean | undefined
 }
 
 export interface StudySchedule {
+    minHoursBetweenSessions: float;
     symbols: ScheduleSymbol[];
+    introComicKey: string | null
+    outroComicKey: string | null
     trials: ScheduleTrial[];
+    endOfSessionRedirect: string | undefined,
+    incompatibleDeviceRedirectURL: string | undefined
 }

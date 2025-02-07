@@ -34,10 +34,10 @@ export class SymbolFactory {
         return symbols;
     }
 
-    createSymbolImage(scene: Phaser.Scene, symbol: Symbol, startX: number, startY: number, size: number, interactive: boolean): Phaser.GameObjects.Image {
+    createSymbolImage(scene: Phaser.Scene, symbol: Symbol, startX: number, startY: number, size: number, interactive: boolean, alpha:number=1): Phaser.GameObjects.Image {
         const graphicKey = this.symbolToGraphicKey.get(symbol);
         if (graphicKey) {
-            const image = scene.add.image(startX, startY, graphicKey).setOrigin(0)
+            const image = scene.add.image(startX, startY, graphicKey).setOrigin(0).setAlpha(alpha)
             image.setDisplaySize(size, size)
             if (interactive) { image.setInteractive() }
             return image

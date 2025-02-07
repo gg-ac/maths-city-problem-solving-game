@@ -1,0 +1,1661 @@
+{
+    "studyID": "study_1_session_0",
+    "minHoursBetweenSessions": "0",
+    "introComicKey": "session_0_intro_comic",
+    "outroComicKey": "session_0_outro_comic",
+    "symbols": [
+        {
+            "symbolID": "a",
+            "graphicKey": "a",
+            "isGeneric": false
+        },
+        {
+            "symbolID": "b",
+            "graphicKey": "b",
+            "isGeneric": false
+        },
+        {
+            "symbolID": "c",
+            "graphicKey": "c",
+            "isGeneric": false
+        },
+        {
+            "symbolID": "d",
+            "graphicKey": "d",
+            "isGeneric": false
+        },
+        {
+            "symbolID": "x",
+            "graphicKey": "x",
+            "isGeneric": true
+        },
+        {
+            "symbolID": "y",
+            "graphicKey": "y",
+            "isGeneric": true
+        }
+    ],
+    "trials": [
+        {
+            "isPractice": true,
+            "instructionsKey": "session-1-instructions-intro",
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "a",
+                "d"
+            ],
+            "targetString": [
+                "b",
+                "c",
+                "a",
+                "d"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": true,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "b",
+                "a",
+                "b",
+                "a",
+                "a"
+            ],
+            "targetString": [
+                "d",
+                "c",
+                "c",
+                "a",
+                "c"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": true,
+            "instructionsKey": "session-1-instructions-pt2",
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "c",
+                "a",
+                "d"
+            ],
+            "targetString": [
+                "a",
+                "c",
+                "a",
+                "d"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "c",
+                    "a",
+                    "d"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "a",
+                "a",
+                "b",
+                "a",
+                "a",
+                "b"
+            ],
+            "targetString": [
+                "a",
+                "c",
+                "a",
+                "c",
+                "b"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "b",
+                    "a",
+                    "a",
+                    "b"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "a",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "a",
+                "b",
+                "c"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "b",
+                    "a",
+                    "a",
+                    "c"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "b",
+                "a",
+                "b",
+                "a"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "d",
+                "c",
+                "b"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "b",
+                    "a",
+                    "a",
+                    "b"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "b",
+                "a",
+                "c",
+                "d",
+                "c",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "b",
+                "a",
+                "b",
+                "c"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "b",
+                    "d",
+                    "c",
+                    "c"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "b",
+                "a",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "a",
+                "b",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "c",
+                "c",
+                "c",
+                "c",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "d",
+                "c",
+                "a",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "a",
+                "b",
+                "a",
+                "b",
+                "b"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "d",
+                "c",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "a",
+                "d"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "a",
+                "b",
+                "d"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "c",
+                "b",
+                "a"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "b"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "d",
+                    "c",
+                    "d",
+                    "c"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "c",
+                "c",
+                "c",
+                "d",
+                "d",
+                "d"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "b",
+                "d",
+                "d"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "d",
+                    "c",
+                    "d",
+                    "d"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "c",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "a",
+                "b",
+                "c"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "a",
+                    "d",
+                    "c",
+                    "c"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "b",
+                "d",
+                "d",
+                "c",
+                "c",
+                "a"
+            ],
+            "targetString": [
+                "a",
+                "a",
+                "b",
+                "d",
+                "c"
+            ],
+            "forbiddenStrings": [
+                [
+                    "a",
+                    "b",
+                    "a",
+                    "d",
+                    "c"
+                ]
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "b",
+                "a",
+                "a",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "c",
+                "a",
+                "c",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "a",
+                "b",
+                "a",
+                "d",
+                "a"
+            ],
+            "targetString": [
+                "a",
+                "d",
+                "a",
+                "b",
+                "a"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "c",
+                "c",
+                "d",
+                "d",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "d",
+                "c",
+                "a",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": false,
+            "trialDurationSeconds": 90,
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "b",
+                "a",
+                "c",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "b",
+                "c",
+                "a",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        },
+        {
+            "isPractice": true,
+            "instructionsKey": "session-1-instructions-ending",
+            "postTrialRest": 3,
+            "rules": [
+                {
+                    "input": [
+                        "x",
+                        "x"
+                    ],
+                    "output": [
+                        "x"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a"
+                    ],
+                    "output": [
+                        "d",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "d",
+                        "c"
+                    ],
+                    "output": [
+                        "a",
+                        "b"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "a"
+                    ],
+                    "output": [
+                        "c",
+                        "a",
+                        "c"
+                    ]
+                },
+                {
+                    "input": [
+                        "b",
+                        "a",
+                        "d"
+                    ],
+                    "output": [
+                        "d",
+                        "d",
+                        "c"
+                    ]
+                }
+            ],
+            "startString": [
+                "a",
+                "d",
+                "b",
+                "a",
+                "c",
+                "d",
+                "c"
+            ],
+            "targetString": [
+                "a",
+                "b",
+                "c",
+                "a",
+                "b"
+            ],
+            "forbiddenStrings": [
+                []
+            ]
+        }
+    ]
+}

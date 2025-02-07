@@ -1,9 +1,10 @@
 import { Scene } from 'phaser';
+import { FontFile } from '../utils/FontFile';
 
 export class Preloader extends Scene
 {
     orientation_warning_text: Phaser.GameObjects.Text;
-    constructor ()
+    constructor (private nextSceneKey:string, private additionalFilepathsForPreload?:string[])
     {
         super('Preloader');
     }
@@ -23,7 +24,6 @@ export class Preloader extends Scene
 
             //  Update the progress bar (our bar is 464px wide, so 100% = 464px)
             bar.width = 4 + (460 * progress);
-            console.log(progress)
 
         });
     }
@@ -33,38 +33,55 @@ export class Preloader extends Scene
         //  Load the assets for the game - Replace with your own assets
         this.load.setPath('assets');
 
-        this.load.image('logo', 'logo.png');        
-        this.load.image('active_symbol_indicator', 'symbols/symbol_selection_box.png');
+        // Make sure the font files are loaded
+        this.load.addFile(new FontFile(this.load, "font1", "Segment7", "fonts/Segment7Standard.woff"))
+        this.load.addFile(new FontFile(this.load, "font1", "Segment7", "fonts/Segment7Standard.woff2"))
 
         // Symbols
         this.load.image('arrow', 'symbols/arrow.png');
-        this.load.image('s1', 'symbols/shape_s1.png');
-        this.load.image('s2', 'symbols/shape_s2.png');
-        this.load.image('s3', 'symbols/shape_s3.png');
-        this.load.image('s4', 'symbols/shape_s4.png');
-        this.load.image('sg1', 'symbols/shape_sg1.png');
-        this.load.image('sg2', 'symbols/shape_sg2.png');
+        this.load.image('ellipsis-symbol', 'symbols/ellipsis_symbol.png');
+        this.load.image('a', 'symbols/symbol1.png');
+        this.load.image('b', 'symbols/symbol2.png');
+        this.load.image('c', 'symbols/symbol3.png');
+        this.load.image('d', 'symbols/symbol4.png');
+        this.load.image('x', 'symbols/symbol_generic1.png');
+        this.load.image('y', 'symbols/symbol_generic2.png');
 
         // User Interface
-        this.load.image('bg-rule-button-up', "ui/rule_button_bg_up.png")
-        this.load.image('bg-rule-button-down', "ui/rule_button_bg_down.png")
-        this.load.image('bg-rule-button-up-light', "ui/rule_button_bg_up_light.png")
-        this.load.image('bg-rule-button-down-light', "ui/rule_button_bg_down_light.png")
-        this.load.image('bg-rule-button-up-light-transparent', "ui/rule_button_bg_up_light_transparent.png")
-        this.load.image('bg-rule-button-down-light-transparent', "ui/rule_button_bg_down_light_transparent.png")
+        this.load.image('bg-console', "new_ui/console_background.png")
+        this.load.image('button-reset-up', "new_ui/button_reset_up.png")
+        this.load.image('button-reset-down', "new_ui/button_reset_down.png")
+        this.load.image('button-undo-up', "new_ui/button_undo_up.png")
+        this.load.image('button-undo-down', "new_ui/button_undo_down.png")
+        this.load.image('icon-cross-large', "new_ui/icon_cross_large.png")
+        this.load.image('icon-tick-large', "new_ui/icon_tick_large.png")
+        this.load.image('icon-tick', "new_ui/icon_tick.png")
+        this.load.image('icon-warning', "new_ui/icon_warning.png")
+        this.load.image('selection-outline', "new_ui/selection_outline.png")
+        this.load.image('odometer-dial', "new_ui/odometer_dial.png")
+        // this.load.image('bg-rule-button-up', "ui/rule_button_bg_up.png")
+        // this.load.image('bg-rule-button-down', "ui/rule_button_bg_down.png")
+        // this.load.image('bg-rule-button-up-light', "ui/rule_button_bg_up_light.png")
+        // this.load.image('bg-rule-button-down-light', "ui/rule_button_bg_down_light.png")
+        // this.load.image('bg-rule-button-up-light-transparent', "ui/rule_button_bg_up_light_transparent.png")
+        // this.load.image('bg-rule-button-down-light-transparent', "ui/rule_button_bg_down_light_transparent.png")
         this.load.image('bg-unused-symbol-space', "ui/unused_symbol_space.png")
         this.load.image('bg-unused-symbol-space-light', "ui/unused_symbol_space_light.png")
-        this.load.image('bg-area-l', "ui/panel_light.png")
-        this.load.image('bg-area-m', "ui/panel_mid.png")
-        this.load.image('bg-area-d', "ui/panel_dark.png")
-        this.load.image('bg-area-outline', "ui/panel_outline.png")
-        this.load.image('icon-forbidden', "ui/icon_forbidden.png")
-        this.load.image('icon-target', "ui/icon_target.png")
-        this.load.image('icon-undo', "ui/icon_undo.png")
+        // this.load.image('bg-area-l', "ui/panel_light.png")
+        // this.load.image('bg-area-m', "ui/panel_mid.png")
+        // this.load.image('bg-area-d', "ui/panel_dark.png")
+        // this.load.image('bg-area-outline', "ui/panel_outline.png")
+        // this.load.image('icon-forbidden', "ui/icon_forbidden.png")
+        // this.load.image('icon-target', "ui/icon_target.png")
+        // this.load.image('icon-undo', "ui/icon_undo.png")
 
-        // Study schedule
-        this.load.json("studySchedule", "studies/study_schedule_1.json")
-       
+        // Load additional files
+        if(this.additionalFilepathsForPreload != undefined){
+            this.additionalFilepathsForPreload.forEach((f) => {
+                this.load.image(f, f);
+            })
+        }
+
     }
 
     create ()
@@ -73,7 +90,13 @@ export class Preloader extends Scene
         //  For example, you can define global animations here, so we can use them in other scenes.
 
         //  Move to the MainMenu. You could also swap this for a Scene Transition, such as a camera fade.
-        this.scene.start('TestScene');
+
+        this.cameras.main.fadeOut(1000, 0, 0, 0)
+
+        this.cameras.main.once(Phaser.Cameras.Scene2D.Events.FADE_OUT_COMPLETE, () => {
+            this.scene.start(this.nextSceneKey);
+        })
+        
     }
 
 }

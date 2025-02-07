@@ -2,6 +2,7 @@ import { SymbolFactory } from "./SymbolFactory";
 import { Symbol } from "./StringTransformation";
 import { MAX_SYMBOL_SIZE, STATE_AREA_MARGIN, STATE_SYMBOL_HORIZONTAL_MARGIN, STATE_SYMBOL_PAD, STATE_SYMBOL_PRESS_OFFSET, STATE_SYMBOL_VERTICAL_MARGIN } from "../constants/GameConstants";
 import { OverlayCamera } from "./OverlayCamera";
+import { HideableItem } from "../ui/HideableItem";
 
 export class StringState {
     constructor(public currentString: Symbol[], public currentActiveIndex: integer | null) {
@@ -12,7 +13,7 @@ export class StringPanelState {
     private currentState: StringState;
 
     private stateHistory: StringState[];
-    constructor(private initialState: StringState, private onStateChange: (newState: StringState, manualChange:boolean) => void) {
+    constructor(private initialState: StringState, private onStateChange: (newState: StringState, oldState: StringState, manualChange: boolean) => void) {
         this.stateHistory = []
         this.setCurrentState(this.initialState, false)
     }
@@ -20,17 +21,20 @@ export class StringPanelState {
     getCurrentState(): StringState {
         return this.currentState;
     }
-    setCurrentState(newState: StringState, manualChange:boolean) {
+    setCurrentState(newState: StringState, manualChange: boolean) {
+        const oldState = this.currentState
         this.currentState = newState;
         this.stateHistory.push(newState)
-        this.onStateChange(newState, manualChange)
+        this.onStateChange(newState, oldState, manualChange)
     }
 
-    public activateSymbol(symbolIndex: integer, manualChange:boolean) {
+    public activateSymbol(symbolIndex: integer, manualChange: boolean) {
         if (this.getCurrentState().currentActiveIndex !== symbolIndex) {
             this.setCurrentState(new StringState(this.getCurrentState().currentString, symbolIndex), manualChange)
+            return symbolIndex
         } else {
             this.setCurrentState(new StringState(this.getCurrentState().currentString, null), manualChange)
+            return null
         }
     }
 
@@ -44,7 +48,7 @@ export class StringPanelState {
     }
 }
 
-export class StringPanelGraphics {
+export class StringPanelGraphics implements HideableItem {
     private maxSymbolSize: number;
     private symbolStringImages: Phaser.GameObjects.Image[]
     private symbolBackgroundUnusedSpaceImages: Phaser.GameObjects.NineSlice[]
@@ -60,14 +64,19 @@ export class StringPanelGraphics {
     private symbolBackgroundUnusedSpaceImagesOverlay: Phaser.GameObjects.NineSlice[];
     private symbolBackgroundUpImagesOverlay: Phaser.GameObjects.NineSlice[];
     private symbolBackgroundDownImagesOverlay: Phaser.GameObjects.NineSlice[];
+    private currentActiveSymbolIndex: integer | null;
+    private interactionDisabled: boolean;
 
-    constructor(private scene: Phaser.Scene, private symbolFactory: SymbolFactory, private x: number, private y: number, private width: number, private height: number, private maxStringLength: integer, private overlayCamera:OverlayCamera) {
+    constructor(private scene: Phaser.Scene, private symbolFactory: SymbolFactory, private x: number, private y: number, private width: number, private height: number, private maxStringLength: integer, private overlayCamera: OverlayCamera) {
 
-        this.background = this.scene.add.nineslice(this.x + STATE_AREA_MARGIN, this.y + STATE_AREA_MARGIN, "bg-area-d", 0, 256, 256, 24, 24, 24, 24).setOrigin(0).setInteractive();
-        this.background.setSize(this.width - 2 * STATE_AREA_MARGIN, this.height - 2 * STATE_AREA_MARGIN)
-        this.panelBorder = this.scene.add.nineslice(this.x + STATE_AREA_MARGIN, this.y + STATE_AREA_MARGIN, "bg-area-outline", 0, 256, 256, 24, 24, 24, 24).setOrigin(0)
-        this.panelBorder.setSize(this.width - 2 * STATE_AREA_MARGIN, this.height - 2 * STATE_AREA_MARGIN)
-        this.overlayCamera.registerOverlayObjects([this.panelBorder])
+        // this.background = this.scene.add.nineslice(this.x + STATE_AREA_MARGIN, this.y + STATE_AREA_MARGIN, "bg-area-d", 0, 256, 256, 24, 24, 24, 24).setOrigin(0).setInteractive();
+        // this.background.setSize(this.width - 2 * STATE_AREA_MARGIN, this.height - 2 * STATE_AREA_MARGIN)
+        // this.panelBorder = this.scene.add.nineslice(this.x + STATE_AREA_MARGIN, this.y + STATE_AREA_MARGIN, "bg-area-outline", 0, 256, 256, 24, 24, 24, 24).setOrigin(0)
+        // this.panelBorder.setSize(this.width - 2 * STATE_AREA_MARGIN, this.height - 2 * STATE_AREA_MARGIN)
+        // this.overlayCamera.registerOverlayObjects([this.panelBorder])
+
+        this.currentActiveSymbolIndex = null
+        this.interactionDisabled = false
 
         const maxSymbolWidth = (this.width - (this.maxStringLength + 1) * STATE_SYMBOL_HORIZONTAL_MARGIN) / this.maxStringLength
         const maxSymbolHeight = this.height
@@ -85,24 +94,60 @@ export class StringPanelGraphics {
         this.activeSymbolImage.setVisible(false)
 
         this.pressVerticalOffset = STATE_SYMBOL_PRESS_OFFSET
-        this.centredX = this.x + (this.width - ((this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN) * this.maxStringLength)) / 2
+        this.centredX = this.x + STATE_AREA_MARGIN + (this.width - ((this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN) * this.maxStringLength)) / 2
         this.centredY = this.y + (this.height - (this.maxSymbolSize + 2 * STATE_SYMBOL_VERTICAL_MARGIN)) / 2
 
+
+        //const bg = this.scene.add.rectangle(this.centredX + this.width/2, this.y+this.height/2, this.width, this.height, 0xffffff, 0.5);
+
+
         for (let i = 0; i < this.maxStringLength; i++) {
-            const bgUnused = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space", 0, 256, 256, 30, 30, 30, 48).setOrigin(0)
-            bgUnused.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgUnused = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space", 0, 256, 256, 30, 30, 30, 30).setOrigin(0)
+            bgUnused.setSize(this.maxSymbolSize, this.maxSymbolSize)
             bgUnused.setVisible(false)
             this.symbolBackgroundUnusedSpaceImages.push(bgUnused)
 
-            const bgUnusedOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space-light", 0, 256, 256, 30, 30, 30, 48).setOrigin(0)
-            bgUnusedOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgUnusedOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space-light", 0, 256, 256, 30, 30, 30, 30).setOrigin(0)
+            bgUnusedOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize)
             bgUnusedOverlay.setVisible(false)
             this.symbolBackgroundUnusedSpaceImagesOverlay.push(bgUnusedOverlay)
 
         }
 
-       
+
         this.overlayCamera.registerOverlayObjects(this.symbolBackgroundUnusedSpaceImagesOverlay)
+    }
+
+    setVisible(visible: boolean, disableInteractive: boolean): void {
+
+        if(disableInteractive){
+            this.interactionDisabled = true
+        }else{
+            this.interactionDisabled = false
+        }
+
+        let graphicsObjects = [this.symbolStringImages,
+        this.symbolBackgroundUnusedSpaceImages,
+        this.symbolBackgroundUpImages,
+        this.symbolBackgroundDownImages,
+        this.symbolBackgroundUnusedSpaceImagesOverlay,
+        this.symbolBackgroundUpImagesOverlay,
+        this.symbolBackgroundDownImagesOverlay]
+
+        for (const objectList of graphicsObjects) {
+            objectList.forEach(o => {
+                o.setVisible(visible)
+            })
+        }
+
+        this.symbolBackgroundDownImagesOverlay.forEach((img) => {
+            img.setVisible(false)
+        })
+
+        if (visible) {
+            // Reset the active symbol to make sure the selected box has the correct visibility
+            this.setActiveSymbolIndex(this.currentActiveSymbolIndex)
+        }
     }
 
     setOnSymbolPress(callback: (symbolIndex: integer) => void) {
@@ -110,8 +155,10 @@ export class StringPanelGraphics {
     }
 
     pressEvent(symbolIndex: integer) {
-        if (this.onSymbolPress) {
-            this.onSymbolPress(symbolIndex)
+        if (!this.interactionDisabled) {
+            if (this.onSymbolPress) {
+                this.onSymbolPress(symbolIndex)
+            }
         }
     }
 
@@ -148,21 +195,21 @@ export class StringPanelGraphics {
             const s = symbols[i]
             const onPress = () => this.pressEvent(i)
 
-            const bgUpOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-rule-button-up-light-transparent", 0, 256, 256, 30, 30, 30, 48).setOrigin(0)
-            bgUpOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgUpOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space", 0, 256, 256, 20, 20, 20, 20).setOrigin(0)
+            bgUpOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize)
             this.symbolBackgroundUpImagesOverlay.push(bgUpOverlay)
 
-            const bgDownOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-rule-button-down-light-transparent", 0, 256, 256, 30, 30, 48, 30).setOrigin(0)
-            bgDownOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgDownOverlay = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "selection-outline", 0, 256, 256, 20, 20, 20, 20).setOrigin(0)
+            bgDownOverlay.setSize(this.maxSymbolSize, this.maxSymbolSize)
             this.symbolBackgroundDownImagesOverlay.push(bgDownOverlay)
 
-            const bgUp = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-rule-button-up-light", 0, 256, 256, 30, 30, 30, 48).setOrigin(0).setInteractive();
-            bgUp.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgUp = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-unused-symbol-space", 0, 256, 256, 20, 20, 20, 20).setOrigin(0).setInteractive();
+            bgUp.setSize(this.maxSymbolSize, this.maxSymbolSize)
             bgUp.on(Phaser.Input.Events.POINTER_DOWN, onPress)
             this.symbolBackgroundUpImages.push(bgUp)
 
-            const bgDown = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "bg-rule-button-down-light", 0, 256, 256, 30, 30, 48, 30).setOrigin(0).setInteractive();
-            bgDown.setSize(this.maxSymbolSize, this.maxSymbolSize + this.pressVerticalOffset)
+            const bgDown = this.scene.add.nineslice(this.centredX + i * (this.maxSymbolSize + STATE_SYMBOL_HORIZONTAL_MARGIN), this.centredY, "selection-outline", 0, 256, 256, 20, 20, 20, 20).setOrigin(0).setInteractive();
+            bgDown.setSize(this.maxSymbolSize, this.maxSymbolSize)
             bgDown.on(Phaser.Input.Events.POINTER_DOWN, onPress)
             this.symbolBackgroundDownImages.push(bgDown)
 
@@ -196,6 +243,8 @@ export class StringPanelGraphics {
 
     setActiveSymbolIndex(symbolIndex: integer | null) {
 
+        this.currentActiveSymbolIndex = symbolIndex
+
         if (symbolIndex !== null) {
 
             this.symbolBackgroundDownImages.forEach((img, i) => {
@@ -203,7 +252,7 @@ export class StringPanelGraphics {
                 if (i === symbolIndex) {
                     img.setVisible(true)
                     this.symbolBackgroundDownImagesOverlay[i].setVisible(true)
-                    this.symbolStringImages[i].setY(this.centredY + STATE_SYMBOL_PAD + this.pressVerticalOffset)
+                    this.symbolStringImages[i].setY(this.centredY + STATE_SYMBOL_PAD)
                 }
                 else {
                     img.setVisible(false)

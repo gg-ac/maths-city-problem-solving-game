@@ -32,7 +32,9 @@ export default defineConfig({
             compress: {
                 passes: 2
             },
-            mangle: true,
+            mangle: {
+                toplevel: true,
+            },
             format: {
                 comments: false
             }

@@ -1,4 +1,8 @@
-{ "studyID":"dev_test_study_1",
+{
+    "studyID": "dev_test_study_1",
+    "minHoursBetweenSessions":1,
+    "introComicKey":"game-intro-comic-full",
+    "outroComicKey":"session-1-outro-comic-full",
     "symbols": [
         {
             "symbolID": "5",
@@ -33,7 +37,10 @@
     ],
     "trials": [
         {
-            "postTrialRest": 5,
+            "isPractice": true,
+            "instructionsKey": "session-1-instructions-pt-1",
+            "trialDurationSeconds": 60,
+            "postTrialRest": 1,
             "rules": [
                 {
                     "input": [
@@ -44,7 +51,8 @@
                         "6",
                         "5"
                     ]
-                },{
+                },
+                {
                     "input": [
                         "5",
                         "5"
@@ -87,6 +95,8 @@
             ]
         },
         {
+            "isPractice": false,
+            "trialDurationSeconds": 60,
             "postTrialRest": 5,
             "rules": [
                 {
