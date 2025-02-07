@@ -1,0 +1,13 @@
+{
+    "studies": {
+        "mini_demo_session": {
+            "groupID": {
+                "group_1a": {
+                    "session": {
+                        "0": "mini_demo_session.json"
+                    }
+                }
+            }
+        }
+    }
+}
