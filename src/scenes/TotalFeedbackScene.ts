@@ -1,6 +1,5 @@
 import { SURVEY_JS_THEME } from "../constants/GameConstants";
 import { DataStore } from "../task/DataStorage";
-import { computePercentile } from "../utils/Utilities";
 import BaseScene from "./BaseScene";
 import * as Survey from "survey-js-ui"
 
@@ -16,7 +15,7 @@ export class TotalFeedbackScene extends BaseScene {
         super.create()
 
         let totalScore = this.dataStore.localTotalScore
-        let totalScorePercent = Math.round(100*totalScore / 750)
+        let totalScorePercent = Math.round(100*totalScore / 900)
         totalScorePercent = totalScorePercent > 100 ? 100 : totalScorePercent
 
         let message = `<p>Your total score was <b>${this.dataStore.localTotalScore} points</b>!</p><p>That's ${totalScorePercent}% of the maximum number of points!</p>`

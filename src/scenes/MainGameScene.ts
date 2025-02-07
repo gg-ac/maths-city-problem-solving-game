@@ -23,7 +23,6 @@ export class MainGameScene extends BaseScene {
     }
 
     create() {
-
         this.symbolFactory = new SymbolFactory()
         this.registerSymbols(this.studySchedule, this.symbolFactory)
 
@@ -35,9 +34,6 @@ export class MainGameScene extends BaseScene {
         this.currentTrial = this.generateNextTrial(this.studySchedule, this.currentTrialIndex, this.symbolFactory)
 
         super.create()
-
-        // Save the session number metadata to the session object in the database
-        this.dataStore.dbSetSessionInfoData(this.currentSessionNumber, this.currentStudyID, this.currentStudyGroup)
 
         this.totalScore = 0
 
@@ -54,21 +50,7 @@ export class MainGameScene extends BaseScene {
         }
 
         let continueToEndScene = () => {
-            // Save the time of this session completion, so we can control minimum time between sessions
-            this.dataStore.dbUpdateLastSessionCompletionData(this.currentSessionNumber, this.currentStudyID, this.currentStudyGroup)
-
-            // Save a flag to indicate that this session was completed
-            this.dataStore.dbSetSessionComplete().then(() => {
-                // Try to open the optional end of session webpage in a new tab, and alert if it is blocked
-                // if (this.studySchedule.endOfSessionRedirect != undefined) {
-                //     const w = window.open(this.studySchedule.endOfSessionRedirect, '_blank');
-                //     if (w == null) {
-                //         alert(`You have completed the session, but your browser prevented the confirmation URL from loading. To confirm that you have completed the session, please visit ${this.studySchedule.endOfSessionRedirect}.`)
-                //     }
-                // }
-                this.scene.start(this.nextSceneKey)
-            })
-
+            this.scene.start(this.nextSceneKey)
         }
 
         console.log(this.currentTrialIndex, this.totalTrials)
@@ -81,25 +63,6 @@ export class MainGameScene extends BaseScene {
         } else {
             this.dataStore.localTotalScore = this.totalScore
             this.currentTrial?.displayFeedback(continueToEndScene, 1000, this.totalScore)
-
-
-            // // Convert the object to a JSON string
-            // const jsonData = JSON.stringify(this.dataStore.toObject(), null, 2); // Pretty-printing
-
-            // // Create a Blob from the JSON string
-            // const blob = new Blob([jsonData], { type: 'application/json' });
-
-            // // Create a link element
-            // const link = document.createElement('a');
-            // link.href = URL.createObjectURL(blob);
-            // link.download = 'data.json';
-
-            // // Programmatically click the link to trigger the download
-            // link.click();
-
-            // // Clean up the URL object
-            // URL.revokeObjectURL(link.href);
-
         }
 
 

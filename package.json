@@ -14,9 +14,8 @@
     },
     "homepage": "https://github.com/phaserjs/template-vite-ts#readme",
     "scripts": {
-        "dev": "concurrently \"npm run dev-vite\" \"npm run dev-firebase\"",
+        "dev": "concurrently \"npm run dev-vite\"",
         "dev-vite": "node log.js dev & vite --config vite/config.dev.mjs",
-        "dev-firebase": "firebase emulators:start",
         "build": "node log.js build & vite build --config vite/config.prod.mjs",
         "dev-nolog": "vite --config vite/config.dev.mjs",
         "build-nolog": "vite build --config vite/config.prod.mjs",
@@ -34,13 +33,9 @@
         "vite": "^5.3.1"
     },
     "dependencies": {
-        "firebase": "^10.14.1",
-        "firebase-tools": "^13.27.0",
-        "firebaseui": "^6.1.0",
         "phaser": "^3.85.2",
         "survey-core": "^1.12.9",
         "survey-js-ui": "^1.12.9",
-        "sweetalert": "^2.1.2",
         "ua-parser-js": "^1.0.39",
         "uuid": "^10.0.0"
     }
