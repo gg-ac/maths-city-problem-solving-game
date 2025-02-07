@@ -1,27 +1,32 @@
-# This is a basic workflow
-name: Github Pages Build and Deploy
+name: Build and Deploy to GitHub Pages
 
-# Controls when the action will run. Triggers the workflow on push request
-# events on the main branch
 on:
   push:
-    branches: [ main ]
+    branches:
+      - master
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2.3.1
+      - name: Checkout code
+        uses: actions/checkout@v2
 
-      - name: Install and Build
-        run: |
-          mkdir -p dist
-          cp -r src/* dist
-
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.0.0
+      - name: Set up Node.js
+        uses: actions/setup-node@v2
         with:
-          BRANCH: gh-pages
-          FOLDER: dist
+          node-version: '14' # Specify the Node.js version you need
+
+      - name: Install dependencies
+        run: npm install # Adjust this command if you're using a different package manager
+
+      - name: Run build script
+        run: npm run build # Adjust this command to match your build script
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./dist # Path to the directory you want to deploy
+          publish_branch: gh-pages # The branch to deploy to
